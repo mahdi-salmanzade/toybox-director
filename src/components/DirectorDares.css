@@ -1,0 +1,13 @@
+.director-dares .field { margin: 12px 0; }
+.director-dares .field select { width: 100%; min-height: 38px; }
+.dare-question { color: var(--ink); font-weight: 700; font-size: 12px; line-height: 1.6; margin-top: 12px; }
+.dare-change, .dare-lead, .dare-footnote { color: #606954; font-size: 11px; line-height: 1.7; }
+.dare-change { margin-top: 5px; }
+.dare-lead { margin: 9px 0 12px; overflow-wrap: anywhere; }
+.director-dares .button { min-height: 40px; }
+.dare-footnote { margin-top: 9px; }
+@media (max-width: 760px) {
+  .director-dares .field select, .director-dares .button { min-height: 44px; }
+  .dare-question { font-size: 13px; }
+  .dare-change, .dare-lead, .dare-footnote { font-size: 12px; }
+}

@@ -1,0 +1,8 @@
+{
+  "_description": "Illustrative node mappings, not a runnable workflow. Replace IDs and widget names with those from your tested ComfyUI API export.",
+  "image": { "nodeId": "10", "input": "image" },
+  "prompt": { "nodeId": "6", "input": "text" },
+  "negativePrompt": { "nodeId": "7", "input": "text" },
+  "seed": { "nodeId": "3", "input": "seed" },
+  "outputNodeId": "13"
+}

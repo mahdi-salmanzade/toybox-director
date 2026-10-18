@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: cinematic sample concept still for Toybox Director, an open-source filmmaking app. This is illustrative concept art, not a UI mockup.
+Primary request: A small vintage vermilion red sports coupe seen from rear three-quarter at road level, speeding on a winding asphalt road through monumental warm sandstone canyon towers. The scene feels like a remarkable lost frame from an auteur science-fiction road movie.
+Scene/backdrop: towering sculptural sandstone architecture and canyon walls, a huge low warm sun distant, hazy dusty peach golden-hour daylight.
+Style/medium: photorealistic cinematic 35mm film still with editorial film-poster quality, physical believable materials, exquisite natural light, subtle film grain.
+Composition/framing: 16:9 landscape, road-level low camera behind the car, sinuous road leads the eye into the enormous canyon, car lower left-center, towering canyon fills the upper frame. Clear sense of miniature human scale against an extraordinary landscape.
+Color palette: refined amber, ochre, faded peach, charcoal asphalt, vermilion-red car.
+Lighting/mood: warm honey sunlight, long dimensional shadows, diffused dusty atmosphere, quietly epic and adventurous.
+Constraints: one car, no people, no text, no branding, no logos, no watermark, no interface, no border.

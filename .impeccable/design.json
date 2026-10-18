@@ -1,0 +1,462 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T13:15:30.973Z",
+  "title": "Design System: Toybox Director",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15.00% 0.0054 95.10)",
+          "oklch(26.43% 0.0054 95.10)",
+          "oklch(37.86% 0.0054 95.10)",
+          "oklch(49.29% 0.0054 95.10)",
+          "oklch(60.71% 0.0054 95.10)",
+          "oklch(72.14% 0.0054 95.10)",
+          "oklch(83.57% 0.0054 95.10)",
+          "oklch(95.00% 0.0054 95.10)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "tonalRamp": [
+          "oklch(15.00% 0.0094 99.99)",
+          "oklch(26.43% 0.0094 99.99)",
+          "oklch(37.86% 0.0094 99.99)",
+          "oklch(49.29% 0.0094 99.99)",
+          "oklch(60.71% 0.0094 99.99)",
+          "oklch(72.14% 0.0094 99.99)",
+          "oklch(83.57% 0.0094 99.99)",
+          "oklch(95.00% 0.0094 99.99)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15.00% 0.0041 91.45)",
+          "oklch(26.43% 0.0041 91.45)",
+          "oklch(37.86% 0.0041 91.45)",
+          "oklch(49.29% 0.0041 91.45)",
+          "oklch(60.71% 0.0041 91.45)",
+          "oklch(72.14% 0.0041 91.45)",
+          "oklch(83.57% 0.0041 91.45)",
+          "oklch(95.00% 0.0041 91.45)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0148 128.97)",
+          "oklch(26.43% 0.0148 128.97)",
+          "oklch(37.86% 0.0148 128.97)",
+          "oklch(49.29% 0.0148 128.97)",
+          "oklch(60.71% 0.0148 128.97)",
+          "oklch(72.14% 0.0148 128.97)",
+          "oklch(83.57% 0.0148 128.97)",
+          "oklch(95.00% 0.0148 128.97)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15.00% 0.0134 106.67)",
+          "oklch(26.43% 0.0134 106.67)",
+          "oklch(37.86% 0.0134 106.67)",
+          "oklch(49.29% 0.0134 106.67)",
+          "oklch(60.71% 0.0134 106.67)",
+          "oklch(72.14% 0.0134 106.67)",
+          "oklch(83.57% 0.0134 106.67)",
+          "oklch(95.00% 0.0134 106.67)"
+        ]
+      },
+      "orange": {
+        "role": "primary",
+        "displayName": "Orange",
+        "tonalRamp": [
+          "oklch(15.00% 0.1518 35.83)",
+          "oklch(26.43% 0.1518 35.83)",
+          "oklch(37.86% 0.1518 35.83)",
+          "oklch(49.29% 0.1518 35.83)",
+          "oklch(60.71% 0.1518 35.83)",
+          "oklch(72.14% 0.1518 35.83)",
+          "oklch(83.57% 0.1518 35.83)",
+          "oklch(95.00% 0.1518 35.83)"
+        ]
+      },
+      "orange-hover": {
+        "role": "primary",
+        "displayName": "Orange Hover",
+        "tonalRamp": [
+          "oklch(15.00% 0.1432 35.08)",
+          "oklch(26.43% 0.1432 35.08)",
+          "oklch(37.86% 0.1432 35.08)",
+          "oklch(49.29% 0.1432 35.08)",
+          "oklch(60.71% 0.1432 35.08)",
+          "oklch(72.14% 0.1432 35.08)",
+          "oklch(83.57% 0.1432 35.08)",
+          "oklch(95.00% 0.1432 35.08)"
+        ]
+      },
+      "sage-text": {
+        "role": "secondary",
+        "displayName": "Sage Text",
+        "tonalRamp": [
+          "oklch(15.00% 0.0341 126.48)",
+          "oklch(26.43% 0.0341 126.48)",
+          "oklch(37.86% 0.0341 126.48)",
+          "oklch(49.29% 0.0341 126.48)",
+          "oklch(60.71% 0.0341 126.48)",
+          "oklch(72.14% 0.0341 126.48)",
+          "oklch(83.57% 0.0341 126.48)",
+          "oklch(95.00% 0.0341 126.48)"
+        ]
+      },
+      "inspector": {
+        "role": "neutral",
+        "displayName": "Inspector",
+        "tonalRamp": [
+          "oklch(15.00% 0.0093 106.57)",
+          "oklch(26.43% 0.0093 106.57)",
+          "oklch(37.86% 0.0093 106.57)",
+          "oklch(49.29% 0.0093 106.57)",
+          "oklch(60.71% 0.0093 106.57)",
+          "oklch(72.14% 0.0093 106.57)",
+          "oklch(83.57% 0.0093 106.57)",
+          "oklch(95.00% 0.0093 106.57)"
+        ]
+      },
+      "field-surface": {
+        "role": "neutral",
+        "displayName": "Field Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0107 118.02)",
+          "oklch(26.43% 0.0107 118.02)",
+          "oklch(37.86% 0.0107 118.02)",
+          "oklch(49.29% 0.0107 118.02)",
+          "oklch(60.71% 0.0107 118.02)",
+          "oklch(72.14% 0.0107 118.02)",
+          "oklch(83.57% 0.0107 118.02)",
+          "oklch(95.00% 0.0107 118.02)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "tonalRamp": [
+          "oklch(15.00% 0.0322 124.50)",
+          "oklch(26.43% 0.0322 124.50)",
+          "oklch(37.86% 0.0322 124.50)",
+          "oklch(49.29% 0.0322 124.50)",
+          "oklch(60.71% 0.0322 124.50)",
+          "oklch(72.14% 0.0322 124.50)",
+          "oklch(83.57% 0.0322 124.50)",
+          "oklch(95.00% 0.0322 124.50)"
+        ]
+      },
+      "field-focus": {
+        "role": "neutral",
+        "displayName": "Field Focus",
+        "tonalRamp": [
+          "oklch(15.00% 0.0067 97.35)",
+          "oklch(26.43% 0.0067 97.35)",
+          "oklch(37.86% 0.0067 97.35)",
+          "oklch(49.29% 0.0067 97.35)",
+          "oklch(60.71% 0.0067 97.35)",
+          "oklch(72.14% 0.0067 97.35)",
+          "oklch(83.57% 0.0067 97.35)",
+          "oklch(95.00% 0.0067 97.35)"
+        ]
+      },
+      "field-focus-border": {
+        "role": "neutral",
+        "displayName": "Field Focus Border",
+        "tonalRamp": [
+          "oklch(15.00% 0.0493 124.59)",
+          "oklch(26.43% 0.0493 124.59)",
+          "oklch(37.86% 0.0493 124.59)",
+          "oklch(49.29% 0.0493 124.59)",
+          "oklch(60.71% 0.0493 124.59)",
+          "oklch(72.14% 0.0493 124.59)",
+          "oklch(83.57% 0.0493 124.59)",
+          "oklch(95.00% 0.0493 124.59)"
+        ]
+      },
+      "focus-ring": {
+        "role": "primary",
+        "displayName": "Focus Ring",
+        "tonalRamp": [
+          "oklch(15.00% 0.1502 37.13)",
+          "oklch(26.43% 0.1502 37.13)",
+          "oklch(37.86% 0.1502 37.13)",
+          "oklch(49.29% 0.1502 37.13)",
+          "oklch(60.71% 0.1502 37.13)",
+          "oklch(72.14% 0.1502 37.13)",
+          "oklch(83.57% 0.1502 37.13)",
+          "oklch(95.00% 0.1502 37.13)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Scene headline",
+        "purpose": "Editable scene names."
+      },
+      "title": {
+        "displayName": "Section title",
+        "purpose": "Compact section and help headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base text and longer explanations."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Dense controls, descriptions, and field values."
+      },
+      "label-strong": {
+        "displayName": "Strong label",
+        "purpose": "Named actions and items."
+      },
+      "library-heading": {
+        "displayName": "Library heading",
+        "purpose": "Shared headings for the render shelf and film workspace; compact desktop layouts reduce the size."
+      }
+    },
+    "shadows": [
+      {
+        "name": "selected-scene",
+        "value": "0 2px 3px #353a2c04",
+        "purpose": "Light seating for the selected scene."
+      },
+      {
+        "name": "selected-tab",
+        "value": "0 1px 2px #30352309",
+        "purpose": "Soft separation for the active viewport tab."
+      },
+      {
+        "name": "dialog",
+        "value": "0 25px 100px #292e2333",
+        "purpose": "Separation for a modal above the workbench."
+      },
+      {
+        "name": "toast",
+        "value": "0 5px 25px #38412e29",
+        "purpose": "A transient message above the workspace."
+      },
+      {
+        "name": "preparation-overlay",
+        "value": "0 18px 70px #29352129",
+        "purpose": "Transient progress surface while opening, saving, or preparing work."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "150ms ease",
+        "purpose": "Background, border, color, and shadow state changes."
+      },
+      {
+        "name": "loading",
+        "value": "1.2s linear infinite",
+        "purpose": "Loading icon rotation; disabled under reduced motion."
+      },
+      {
+        "name": "toast-enter",
+        "value": "200ms ease-out",
+        "purpose": "An eight-pixel upward entrance with an opacity fade; reduced-motion overrides apply."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "two-column-render-shelf",
+        "value": "1750px"
+      },
+      {
+        "name": "wide",
+        "value": "1700px"
+      },
+      {
+        "name": "compact-desktop",
+        "value": "1220px"
+      },
+      {
+        "name": "compact-library",
+        "value": "1160px"
+      },
+      {
+        "name": "collapsed-rail",
+        "value": "1020px"
+      },
+      {
+        "name": "stacked-film",
+        "value": "1000px"
+      },
+      {
+        "name": "narrow-desktop-controls",
+        "value": "950px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "small-mobile",
+        "value": "390px"
+      },
+      {
+        "name": "compact-mobile-library",
+        "value": "380px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary button from the shipped studio.",
+      "html": "<button class=\"ds-button-primary\">Make it cinematic <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:9px 13px;border:1px solid #d5d6cc;border-radius:7px;font-size:11px;font-weight:700;line-height:1.4;white-space:nowrap;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;background:var(--orange,#b9492b);border-color:var(--orange,#b9492b);color:#fffdf8;}.ds-button-primary:not(:disabled):hover{background:#a43c22;border-color:#a43c22;}.ds-button-primary:disabled{cursor:not-allowed;opacity:.4}.ds-button-primary:focus-visible{outline:2px solid #c45534;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "Neutral button",
+      "kind": "button",
+      "refersTo": "button-neutral",
+      "description": "Neutral button from the shipped studio.",
+      "html": "<button class=\"ds-button-neutral\">Download video</button>",
+      "css": ".ds-button-neutral{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:9px 13px;border:1px solid #d5d6cc;border-radius:7px;font-size:11px;font-weight:700;line-height:1.4;white-space:nowrap;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;background:var(--white,#fdfcf9);color:var(--ink,#33372f);}.ds-button-neutral:not(:disabled):hover{background:#eeeee6;border-color:#bdc0b1;}.ds-button-neutral:disabled{cursor:not-allowed;opacity:.4}.ds-button-neutral:focus-visible{outline:2px solid #c45534;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-neutral{transition:none}}"
+    },
+    {
+      "name": "Subtle button",
+      "kind": "button",
+      "refersTo": "button-subtle",
+      "description": "Subtle button from the shipped studio.",
+      "html": "<button class=\"ds-button-subtle\">Same position in every frame</button>",
+      "css": ".ds-button-subtle{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:9px 13px;border:1px solid #d5d6cc;border-radius:7px;font-size:11px;font-weight:700;line-height:1.4;white-space:nowrap;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;background:transparent;border-color:var(--line,#dfdfd5);color:#62665b;}.ds-button-subtle:not(:disabled):hover{background:#eeede6;}.ds-button-subtle:disabled{cursor:not-allowed;opacity:.4}.ds-button-subtle:focus-visible{outline:2px solid #c45534;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-subtle{transition:none}}"
+    },
+    {
+      "name": "Danger button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "The explicit destructive action in inline render or project deletion confirmation.",
+      "html": "<button class=\"ds-button-danger\">Delete</button>",
+      "css": ".ds-button-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;padding:9px 13px;border:1px solid #d5d6cc;border-radius:7px;font-size:11px;font-weight:700;line-height:1.4;white-space:nowrap;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;background:#faeee7;border-color:#dfbcac;color:#9c432b;}.ds-button-danger:not(:disabled):hover{background:#f4dfd4;border-color:#c68c74;color:#87351f;}.ds-button-danger:disabled{cursor:not-allowed;opacity:.4}.ds-button-danger:focus-visible{outline:2px solid #c45534;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-danger{transition:none}}"
+    },
+    {
+      "name": "Icon button",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "A compact secondary utility action.",
+      "html": "<button class=\"ds-button-icon\" aria-label=\"Add a scene\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button>",
+      "css": ".ds-button-icon{display:inline-flex;align-items:center;justify-content:center;min-width:31px;width:31px;height:31px;padding:0;border:0;background:none;color:#777b6f;border-radius:6px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}.ds-button-icon:not(:disabled):hover{color:var(--ink,#33372f);background:#e8e8df}.ds-button-icon:disabled{opacity:.4;cursor:not-allowed}.ds-button-icon:focus-visible{outline:2px solid #c45534;outline-offset:3px}"
+    },
+    {
+      "name": "Text button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "An unobtrusive related action.",
+      "html": "<button class=\"ds-button-text\">Explore this look <svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></button>",
+      "css": ".ds-button-text{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#606954;white-space:nowrap;background:none;border:0;padding:0;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}.ds-button-text:hover{color:#405635}.ds-button-text:focus-visible{outline:2px solid #c45534;outline-offset:3px}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A labelled editable prop field, with the shipped focus treatment.",
+      "html": "<label class=\"ds-field\"><span>Prop name</span><input value=\"Little car\" /></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;min-width:0;max-width:300px;font-family:Manrope,Arial,sans-serif;}.ds-field>span{font-size:11px;color:#606954}.ds-field input{width:100%;min-width:0;border:1px solid #dbe4cd;background:#fafcf4;border-radius:5px;padding:8px 9px;font-size:11px;line-height:1.55;color:#606954;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}.ds-field input:focus{border-color:#a9b694;background:#fffef9}.ds-field input:focus-visible{outline:2px solid #c45534;outline-offset:3px}"
+    },
+    {
+      "name": "Viewport tabs",
+      "kind": "nav",
+      "refersTo": "viewport-tabs",
+      "description": "Four related workspaces: scene stage, concept reference, persistent Output, and project-level Film edit.",
+      "html": "<div class=\"ds-viewport-tabs\" role=\"tablist\" aria-label=\"Viewport\"><button role=\"tab\" aria-selected=\"true\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12m-4.5-7.4 9 5.15\"/></svg> Your stage</button><button role=\"tab\" aria-selected=\"false\">Look reference</button><button role=\"tab\" aria-selected=\"false\">Output</button><button role=\"tab\" aria-selected=\"false\">Film edit</button></div>",
+      "css": ".ds-viewport-tabs{display:inline-flex;gap:2px;align-items:center;background:#eeeee6;border-radius:6px;padding:3px}.ds-viewport-tabs button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:27px;padding:5px 10px;color:#606954;border:0;background:none;border-radius:4px;white-space:nowrap;font-size:11px;line-height:1.4;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}.ds-viewport-tabs button:hover{color:#565e4e;background:#e4e6da}.ds-viewport-tabs button[aria-selected=true]{background:#fdfcf8;color:#626b58;box-shadow:0 1px 2px #30352309}.ds-viewport-tabs button:focus-visible{outline:2px solid #c45534;outline-offset:3px}@media(max-width:760px){.ds-viewport-tabs{display:grid;grid-template-columns:1fr 1.22fr .82fr .91fr;min-height:46px}.ds-viewport-tabs button{min-height:40px;font-size:10px;line-height:1.35;padding:6px 3px;white-space:normal}}"
+    },
+    {
+      "name": "Stage tag",
+      "kind": "chip",
+      "refersTo": "stage-tag",
+      "description": "A small descriptive status label on the stage.",
+      "html": "<span class=\"ds-stage-tag\"><span></span>Miniature set</span>",
+      "css": ".ds-stage-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid #d2d0c4;background:#f7f5edda;color:#606954;border-radius:4px;font-size:11px;line-height:1.2;letter-spacing:.15px;font-family:Manrope,Arial,sans-serif;}.ds-stage-tag>span{display:inline-block;width:4px;height:4px;border-radius:50%;background:#8c967e}"
+    },
+    {
+      "name": "Render card",
+      "kind": "card",
+      "refersTo": "render-card",
+      "description": "A persistent render shelf item with a written status, local metadata, and state-dependent media and recovery actions.",
+      "html": "<article class=\"ds-render-card\"><div class=\"ds-render-title\"><strong>The great escape</strong><span class=\"ds-render-status\">Completed</span></div><p class=\"ds-render-meta\">Midnight, in Miniature \u00b7 Oct 17, 11:00 AM</p></article>",
+      "css": ".ds-render-card{min-width:0;background:var(--white,#fdfcf9);color:var(--ink,#33372f);padding:15px;border:1px solid var(--line,#dfdfd5);border-radius:8px;font-family:Manrope,Arial,sans-serif}.ds-render-title{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 10px;margin-bottom:5px}.ds-render-title strong{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.ds-render-status{padding:4px 7px;border:1px solid #dce1d1;border-radius:4px;background:#eff2e6;line-height:1.3;font-size:10px;color:#606954;flex-shrink:0}.ds-render-meta{color:#606954;font-size:10px;line-height:1.65;margin:0 0 14px;overflow-wrap:anywhere}@media(max-width:760px){.ds-render-card{padding:12px}.ds-render-title strong{font-size:11px}.ds-render-status{padding:4px 6px}.ds-render-meta{margin-bottom:12px}}"
+    },
+    {
+      "name": "Prop row",
+      "kind": "custom",
+      "refersTo": "prop-row",
+      "description": "A selected object in the inspector, with name and cinematic role.",
+      "html": "<button class=\"ds-prop-row ds-prop-active\" aria-pressed=\"true\"><span class=\"ds-prop-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z\"/><path d=\"m3.3 7 8.7 5 8.7-5M12 22V12m-4.5-7.4 9 5.15\"/></svg></span><span class=\"ds-prop-copy\"><strong>Building block</strong><small>A grand gateway</small></span><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg></button>",
+      "css": ".ds-prop-row{width:100%;max-width:320px;display:flex;align-items:center;gap:8px;border:1px solid #dfe4d5;border-radius:6px;background:#f9faf3;padding:8px 7px;text-align:left;color:#606954;cursor:pointer;font-family:Manrope,Arial,sans-serif;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}.ds-prop-row:hover{background:#e9eee1;border-color:#cbd7bb}.ds-prop-row.ds-prop-active{border-color:#b0bd9c;background:#eaf0e0}.ds-prop-icon{display:flex;align-items:center;justify-content:center;width:29px;height:30px;border-radius:5px;background:#e9eadd;filter:saturate(.8)}.ds-prop-copy{min-width:0;flex:1}.ds-prop-copy strong{display:block;font-size:11px;color:#606954;font-weight:700}.ds-prop-copy small{display:block;font-size:11px;color:#606954;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}.ds-prop-row:focus-visible{outline:2px solid #c45534;outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The modelmaker's workbench",
+    "overview": "Toybox places a miniature stage inside a quiet, practical workshop. Warm paper, soft sage, fine borders, compact controls, and a self-hosted sans family give the studio a calm, tactile character. The imagery carries the dramatic color; the surrounding tools remain legible and restrained.\n\nThe visual personality belongs to a working instrument: an editable scene title, visible selection, measured playback, and closely related controls. Spacious scenic content and dense tooling coexist. The project-level film view gives the preview and cut assembly a shared working area, while project and render shelves use the same quiet materials. On phones, Stage and Director become separate views of the same workspace, and film editing follows the page vertically.\n\nThis v0.2 record is derived from the shipped CSS, React components, and retained screenshots, including `.impeccable/review/film-desktop-final.png` and `.impeccable/review/film-mobile-final.png`. The brief supplies the workbench name; no approved comparison comp or independently retained concept roll is asserted.",
+    "keyCharacteristics": [
+      "Warm paper surfaces with sage tooling and burnt orange actions.",
+      "Compact Manrope text with weight and spacing doing most of the hierarchy work.",
+      "A large scenic viewport, fine separators, and softly rounded control groups.",
+      "A project-level film workspace with an adjacent preview and clip assembly on desktop.",
+      "Explicit selected states and persistent access to stage direction on mobile."
+    ],
+    "rules": [
+      {
+        "name": "The Scenic Color Rule",
+        "body": "Let the stage, reference images, and output carry broad color; keep the surrounding workbench in paper and sage tones.",
+        "section": "colors"
+      },
+      {
+        "name": "The Visible Selection Rule",
+        "body": "Pair selection color with a border, underline, indicator, checkmark, or explicit selected state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Hierarchy Rule",
+        "body": "Use weight, spacing, and placement to separate controls before adding another typeface or a large heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Working Scope Rule",
+        "body": "Match the working area and heading to the object being edited: scene tools surround a scene; the film uses the project title and the full available workspace.",
+        "section": "layout"
+      },
+      {
+        "name": "The Paper Separation Rule",
+        "body": "Establish persistent regions with tone and fine borders; reserve substantial shadow for transient overlays.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do let scenic content provide the strongest visual color.",
+      "Do keep controls compact, with fine borders and the recorded paper and sage palette.",
+      "Do give selected items a visible structural cue as well as a color change.",
+      "Do use tabular numerals for time, frame timing, and seeds.",
+      "Do retain Stage and Director access when the workbench collapses to mobile.",
+      "Do label concept imagery and distinguish previews from completed renders.",
+      "Do match scene and project headings to the current editing scope.",
+      "Do keep film preview, clip assembly, and export controls together on desktop and in readable page order on mobile.",
+      "Do pair render status colors with written states and keep recovery actions beside the affected render."
+    ],
+    "donts": [
+      "Don't use the burnt orange primary-action treatment as a general panel background.",
+      "Don't apply modal shadows to persistent rails, fields, or the whole workspace.",
+      "Don't turn component-specific uppercase labels or isolated pale text values into new global typography roles.",
+      "Don't present concept artwork or a stage preview as a completed generated shot."
+    ]
+  }
+}

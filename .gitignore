@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.toybox/
+.DS_Store
+*.tsbuildinfo
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/studio-brief.md

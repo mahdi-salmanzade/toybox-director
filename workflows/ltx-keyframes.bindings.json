@@ -1,0 +1,62 @@
+{
+  "image": {
+    "nodeId": "5",
+    "input": "image"
+  },
+  "keyframes": [
+    {
+      "nodeId": "14",
+      "input": "image",
+      "position": 0.5,
+      "frame": {
+        "nodeId": "15",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "15",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "16",
+      "input": "image",
+      "position": 1,
+      "frame": {
+        "nodeId": "17",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "17",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    }
+  ],
+  "prompt": {
+    "nodeId": "3",
+    "input": "text"
+  },
+  "negativePrompt": {
+    "nodeId": "4",
+    "input": "text"
+  },
+  "seed": {
+    "nodeId": "10",
+    "input": "noise_seed"
+  },
+  "duration": {
+    "nodeId": "6",
+    "input": "length",
+    "unit": "frames",
+    "fps": 24,
+    "frameStep": 8
+  },
+  "outputNodeId": "13"
+}

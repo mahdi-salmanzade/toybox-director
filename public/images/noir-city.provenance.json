@@ -1,0 +1,11 @@
+{
+  "title": "Midnight escape",
+  "type": "illustrative-sample-concept",
+  "generator": "OpenAI built-in image_gen",
+  "created": "2026-10-16",
+  "prompt": "noir-city.prompt.txt",
+  "note": "Generated illustrative concept art. Not evidence of a Toybox Director or Comfy workflow render.",
+  "transformations": [
+    "Resized to 1600px width and encoded WebP at quality 87."
+  ]
+}

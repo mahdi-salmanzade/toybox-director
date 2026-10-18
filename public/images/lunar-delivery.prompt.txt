@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: cinematic sample concept still for Toybox Director, an open-source filmmaking app. Illustrative concept art only, not a UI mockup.
+Primary request: A tiny vermilion red lunar delivery rover with a simple rounded cabin and four large exposed black wheels travels alone across a pale dusty lunar landscape, approaching monumental sculptural brutalist structures on the horizon.
+Scene/backdrop: immense monolithic pale concrete towers and elegant elevated bridges, moon dust track curving through the foreground, a giant dusty pink moon low above the horizon, rich indigo and midnight blue space sky with subtle tiny stars.
+Style/medium: extraordinary cinematic science-fiction 35mm film still, photorealistic materials, art-directed editorial film poster quality, subtle fine film grain, beautiful understated retrofuturism.
+Composition/framing: landscape 16:9; camera close to the lunar surface; tiny red rover in lower-left center seen from behind three-quarter; structures have enormous scale and occupy middle-right; broad sky and dramatic quiet space.
+Color palette: warm ivory, indigo, dusty rose and punchy vermilion red.
+Lighting/mood: pale peach raking light, long crisp shadows, dreamlike adventurous solitude, atmospheric and refined.
+Constraints: single rover only; no people, no text, no badges, no branding, no logos, no watermark, no UI, no border.
