@@ -51,6 +51,33 @@ Expected SHA-256 values:
 6e480b09fae049a72d2a8c5fbccb8d3e92febeb233bbe9dfe7256958a9167635  t5xxl_fp16.safetensors
 ```
 
+## Restyle models (optional)
+
+**Make keyframes real** restyles each stage capture with Qwen-Image-Edit-2511 before it guides LTX. The studio, staging, and rendering all work without these files; only that action needs them. They total about 59 GB. Use the bf16 files: Apple MPS does not run the fp8 builds.
+
+| File | Directory under ComfyUI | Download size | License |
+| --- | --- | --- | --- |
+| `qwen_image_edit_2511_bf16.safetensors` | `models/diffusion_models/` | 40.86 GB | Apache-2.0 |
+| `qwen_2.5_vl_7b.safetensors` | `models/text_encoders/` | 16.58 GB | Apache-2.0 |
+| `qwen_image_vae.safetensors` | `models/vae/` | 0.25 GB | Apache-2.0 |
+| `Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors` | `models/loras/` | 0.85 GB | Apache-2.0 |
+
+Sources, pinned to the revisions verified here:
+
+- [qwen_image_edit_2511_bf16.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image-Edit/resolve/f68ace85e60b4a02a323e394253731947657b7d2/split_files/diffusion_models/qwen_image_edit_2511_bf16.safetensors) ([model card](https://huggingface.co/Qwen/Qwen-Image-Edit-2511))
+- [qwen_2.5_vl_7b.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image/resolve/1f12b17be14c89b026c51a91d67c32f84bb047bc/split_files/text_encoders/qwen_2.5_vl_7b.safetensors)
+- [qwen_image_vae.safetensors](https://huggingface.co/Comfy-Org/Qwen-Image/resolve/1f12b17be14c89b026c51a91d67c32f84bb047bc/split_files/vae/qwen_image_vae.safetensors)
+- [Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors](https://huggingface.co/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/107d238d68b8387e32843d0b4a2e24ceb0d3ad86/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors)
+
+Expected SHA-256 values:
+
+```text
+ae42d927b5fac4f278b9a894554c727e619727a63622976f2d95625be4bce08c  qwen_image_edit_2511_bf16.safetensors
+cfafd739459bc86257397259f612a9aee88e5b98e85b5c0d0d1717e898b3463a  qwen_2.5_vl_7b.safetensors
+a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f  qwen_image_vae.safetensors
+22226e8d05d354bb356627d428809f5afd7819399b077238a2b70a82883a904f  Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors
+```
+
 ## Start and status
 
 The project helper reuses this installation and preserves an existing workflow:

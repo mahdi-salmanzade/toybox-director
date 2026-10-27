@@ -87,6 +87,14 @@ The detector found zero anti-pattern failures and five existing scene-prop color
 - Control render: the same saved request, seed, and prompt with both guides bypassed. The guided render follows the staged path and camera move; the first-frame-only render invents different scenery and motion. Frames 0, 72, and 144 of both are compared in `docs/media/keyframe-guides-comparison.jpg`.
 - FFmpeg scene detection found no cuts in the guided clip; the car moves continuously and passes behind a tower.
 
+## Keyframe restyling — October 27, 2026
+
+- `npm test`: **100 passing tests**, adding restyle instructions and looks, the reveal's toy hold and guides, strip panel bounds, and a real-SDK submission of the bundled Qwen-Image-Edit graph with and without a look reference.
+- Models: Qwen-Image-Edit-2511 bf16, Qwen2.5-VL 7B, the Qwen-Image VAE, and the 4-step Lightning LoRA, all Apache-2.0; SHA-256 values match `docs/LOCAL-RUNTIME.md`. A 1280×800 restyle takes about 35 seconds on the M5 Max once loaded.
+- Driven through the production studio in headless Chrome: import, **Make keyframes real**, then **Make it cinematic**, for a reveal shot and a three-keyframe drive.
+- What testing changed: long scene descriptions made the edit model recompose the shot, so instructions are short and literal. Restyling keyframes separately made the place change mid-shot, and passing a restyled keyframe as a reference made later keyframes copy its layout; editing all real keyframes as one side-by-side strip fixed both. A reveal that went straight from toy to real melted the toy, so the toy now holds through the middle keyframe.
+- Remaining issue: a strip edit can still duplicate an object. One seed added a second car to the first keyframe; another seed did not. Shuffling the seed and restyling again is the recovery.
+
 ## Limits
 
 The bundled workflow guides generation with all three keyframes, but guides are soft: LTX can drift between them, and an uploaded opening photo disables stage-captured guides for frames without their own photo. Draft model output remains stylized and does not promise the reference artwork's appearance. Film export is silent, uses hard cuts, and supports up to 24 clips / five minutes. Arbitrary custom workflows, fresh runtime installation on other operating systems, other GPU hardware, Safari/Firefox, and public hosting have not been verified. Model licenses are separate from the app's MIT license.

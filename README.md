@@ -36,7 +36,7 @@ npm run setup:local -- --start
 npm start
 ```
 
-Setup installs isolated ComfyUI and the official API v2 proxy under the ignored `.toybox/runtime` directory. It creates `.env` for localhost and configures the bundled workflow. Model weights are a separate ~16 GB download; source URLs, exact hashes, and licenses are recorded in [the runtime guide](docs/LOCAL-RUNTIME.md). FFmpeg and FFprobe for film export are separate system prerequisites; the setup helper does not install them.
+Setup installs isolated ComfyUI and the official API v2 proxy under the ignored `.toybox/runtime` directory. It creates `.env` for localhost and configures the bundled workflow. Model weights are a separate ~16 GB download (plus ~59 GB for the optional restyle models); source URLs, exact hashes, and licenses are recorded in [the runtime guide](docs/LOCAL-RUNTIME.md). FFmpeg and FFprobe for film export are separate system prerequisites; the setup helper does not install them.
 
 `npm run setup:local -- --status` checks whether the engine is running. The full local pipeline has been verified on macOS with Apple Silicon (M5 Max, 128 GB, MPS); other GPUs and operating systems have not been verified yet.
 
@@ -54,6 +54,8 @@ The API is bound to localhost. This is a single-user local app, not a multi-tena
 - Try **Director’s dares** that move the scenery, reverse the scale hierarchy, or close a stage loop. Each creates a separate take with the original intact.
 - Set beginning, middle, and ending positions and pick a camera move; play and scrub the staging animation. All three keyframes guide the generated video.
 - Transform the same layout into a live canyon, lunar outpost, or night city, or upload a real photo for a keyframe.
+- **Make keyframes real**: restyle the staged keyframes into photographs with open-weight Qwen-Image-Edit-2511 in your ComfyUI. All real keyframes are edited together as one side-by-side strip, so they share one place, light, and cast while each keeps its own staging. Results become keyframe photos you can compare, keep, or swap back to the stage.
+- **Toy → real reveal**: keyframe 1 becomes a real photograph of the toys on a tabletop and holds through the middle; by the last keyframe they are the real thing. Stage it once and render the toy-car-to-real-car transformation.
 - Save multiple projects in IndexedDB, switch between them, undo/redo edits, and export/import editable `.toybox.json` backups.
 - Generate real video through the bundled open-weight LTX 2B workflow, or import and map another Comfy API workflow.
 - Render every scene in a project as a batch, with up to 12 active render jobs. Stop adding unsubmitted shots, cancel individual active jobs, or retry failed and canceled renders.
@@ -69,7 +71,7 @@ Keyboard: **Space** plays the stage; **1 / 2 / 3** selects a keyframe; **Cmd/Ctr
 
 *Above: the three staged keyframes with a push-in. Middle: the guided LTX render at 0, 3, and 6 seconds. Bottom: the same seed and prompt with only the first frame; the model invents its own path and scenery.*
 
-Guides steer the model strongly but are not pixel-exact; LTX fills the motion between them. If keyframe 1 is an uploaded photo, later keyframes without their own photo are left out so the stage world never fights your photo. Draft output is 512×320 at 24 fps. Duration maps to the model's valid `8n+1` frame counts. Camera moves: locked off, push in, pull out, orbit left or right, crane up or down.
+With **Make keyframes real**, the guides are photographs instead of stage renders, so LTX renders a real-looking place instead of copying the low-poly stage. Restyles can still add or drop an object; shuffle the seed and make the keyframes real again for another take. Guides steer the model strongly but are not pixel-exact; LTX fills the motion between them. If keyframe 1 is an uploaded photo, later keyframes without their own photo are left out so the stage world never fights your photo. Draft output is 512×320 at 24 fps. Duration maps to the model's valid `8n+1` frame counts. Camera moves: locked off, push in, pull out, orbit left or right, crane up or down.
 
 The images in `public/images` are illustrative concepts, not renders made by this app. Their prompts and provenance are included beside them. Completed videos appear in the render library only after the engine produces and Toybox downloads them.
 
@@ -107,7 +109,7 @@ npm test
 npm run build
 ```
 
-The current verification pass has **94 passing tests**, covering keyframe guidance and camera moves, authored story continuity, creative scene transformations, project persistence and migration, malformed imports, film edit validation, workflow bindings, SDK submission and recovery, cancellation, retries, real video assembly, and production file boundaries. Browser checks include desktop and mobile creation, local generation, playback, and MP4 downloads. See [VERIFICATION.md](docs/VERIFICATION.md) for the evidence, [CREATIVE-DIRECTION.md](docs/CREATIVE-DIRECTION.md) for the authoring standard, and the runtime guide for model details. Generation quality and timing depend on hardware, models, and settings.
+The current verification pass has **100 passing tests**, covering keyframe restyling and reveals, keyframe guidance and camera moves, authored story continuity, creative scene transformations, project persistence and migration, malformed imports, film edit validation, workflow bindings, SDK submission and recovery, cancellation, retries, real video assembly, and production file boundaries. Browser checks include desktop and mobile creation, local generation, playback, and MP4 downloads. See [VERIFICATION.md](docs/VERIFICATION.md) for the evidence, [CREATIVE-DIRECTION.md](docs/CREATIVE-DIRECTION.md) for the authoring standard, and the runtime guide for model details. Generation quality and timing depend on hardware, models, and settings.
 
 ## License and credits
 

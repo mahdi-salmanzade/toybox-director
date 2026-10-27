@@ -147,7 +147,7 @@ export function makeStoryProject(id: StorySparkId): Project {
     const props: StageProp[] = score.cast.map(({ blocking: _blocking, ...prop }) => ({ ...prop, id: uid() }));
     return {
       id: uid(), name: score.name, note: score.note, world: spark.world, props,
-      camera: score.camera, cameraMove: 'static', duration: 3, seed: 1701 + sceneIndex, prompt: score.prompt,
+      camera: score.camera, cameraMove: 'static', reveal: false, duration: 3, seed: 1701 + sceneIndex, prompt: score.prompt,
       frames: score.labels.map((label, frameIndex) => ({
         id: uid(), label,
         poses: Object.fromEntries(props.map((prop, propIndex): [string, Pose] => {

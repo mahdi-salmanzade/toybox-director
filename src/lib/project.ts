@@ -9,10 +9,12 @@ export type Frame = { id: string; label: string; poses: Record<string, Pose>; im
 export type Shot = {
   id: string; name: string; note: string; world: WorldId; props: StageProp[]; frames: Frame[];
   duration: number; prompt: string; camera: 'wide' | 'low' | 'overhead'; cameraMove: CameraMove; seed: number;
+  /** Toy → real: keyframe 1 is the toy set, the last keyframe is the real world. */
+  reveal: boolean;
 };
 export type MovieClip = { id: string; jobId: string; outputIndex: number; inPoint: number; outPoint?: number };
 export type Project = { version: 1; id: string; name: string; shots: Shot[]; activeShotId: string; edit?: { clips: MovieClip[] } };
-export type Health = { connected: boolean; provider?: string; message: string; workflowConfigured?: boolean; keyframeGuides?: number[] };
+export type Health = { connected: boolean; provider?: string; message: string; workflowConfigured?: boolean; keyframeGuides?: number[]; restyleAvailable?: boolean };
 export type RenderJob = { id: string; status: 'queued' | 'running' | 'completed' | 'failed'; progress?: number; outputs?: { url: string; type: string }[]; error?: string };
 export const worlds: {id: WorldId; name: string; subtitle: string; image: string; prompt: string; color: string}[] = [
   { id: 'desert', name: 'Dune roads', subtitle: 'Warm · cinematic', image: '/images/desert-escape.webp', color: '#c4976a', prompt: 'a monumental sandstone canyon, winding desert highway, dusty golden-hour light, warm ochre palette, cinematic 35mm film' },
@@ -51,7 +53,7 @@ export function makeShot(name = 'The great escape', world: WorldId = 'desert'): 
       [props[1].id]: { x: -1.6, z: -1.4, rotation: -.2 },
       [props[2].id]: { x: 2.5, z: .6, rotation: 2.2 },
     } })),
-    duration: 6, prompt: preset.prompt, camera: 'wide', cameraMove: 'push-in', seed: 42,
+    duration: 6, prompt: preset.prompt, camera: 'wide', cameraMove: 'push-in', seed: 42, reveal: false,
   };
 }
 export function makeProject(): Project {
@@ -126,7 +128,8 @@ export function compilePrompt(shot: Shot): string {
   const cast = shot.props.map(prop => `${prop.name} represents ${prop.role}`).join('. ');
   const angle = shot.camera === 'low' ? 'Low angle close to the ground' : shot.camera === 'overhead' ? 'Overhead establishing shot' : 'Wide three-quarter view';
   const move = cameraMoves.find(item => item.id === shot.cameraMove)!.direction;
-  return `${shot.prompt}\nWorld: ${world.prompt}.\nCast: ${cast}.\nCamera: ${angle}. ${move}\nMotion: ${describeMotion(shot)}`;
+  const reveal = shot.reveal ? '\nTransformation: The shot opens on toys on a tabletop and holds still. Then, in one fast seamless transformation, the tabletop becomes the real world and every toy becomes the real thing it represents.' : '';
+  return `${shot.prompt}\nWorld: ${world.prompt}.\nCast: ${cast}.\nCamera: ${angle}. ${move}\nMotion: ${describeMotion(shot)}${reveal}`;
 }
 export function interpolatePose(shot: Shot, id: string, time: number): Pose {
   time = Number.isFinite(time) ? Math.max(0, Math.min(time, 1)) : 0;
@@ -174,8 +177,9 @@ export function parseProject(raw: string): Project {
       return { id: f.id, label: f.label, poses, ...(typeof f.image === 'string' ? { image: f.image } : {}) };
     });
     if (s.cameraMove !== undefined && !isCameraMove(s.cameraMove)) throw new Error('This project contains an unknown camera move.');
+    if (s.reveal !== undefined && typeof s.reveal !== 'boolean') throw new Error('This project contains an invalid reveal setting.');
     // Projects saved before camera moves keep their original locked camera.
-    return { id: s.id, name: s.name, note: s.note, world: s.world, props, frames, duration: s.duration, prompt: s.prompt, camera: s.camera, cameraMove: s.cameraMove ?? 'static', seed: s.seed };
+    return { id: s.id, name: s.name, note: s.note, world: s.world, props, frames, duration: s.duration, prompt: s.prompt, camera: s.camera, cameraMove: s.cameraMove ?? 'static', seed: s.seed, reveal: s.reveal ?? false };
   });
   if (!validId(p.activeShotId) || !ids.has(p.activeShotId)) throw new Error('This project is missing its active shot.');
   let edit: Project['edit'];

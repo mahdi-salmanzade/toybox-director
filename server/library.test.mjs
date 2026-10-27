@@ -63,10 +63,10 @@ async function promptly(promise) {
 
 function upstream() {
   const records = new Map(), submitted = [], seen = [];
-  let cancelFailure = false, nextState = 'queued', cancelResponseState, afterCancelState = 'canceled';
+  let cancelFailure = false, nextState = 'queued', cancelResponseState, afterCancelState = 'canceled', outputNode = '3';
   const now = new Date().toISOString();
   function wire(id, state) {
-    return { id, status: state, created_at: now, started_at: now, completed_at: ['succeeded', 'failed', 'canceled'].includes(state) ? now : null, expires_at: '2099-01-01T00:00:00Z', queue_position: null, progress: { value: state === 'succeeded' ? 1 : 0.25, nodes_done: 1, nodes_total: 3 }, outputs: state === 'succeeded' ? [{ id: `output-${id}`, node_id: '3', name: 'result.png', type: 'image', content_type: 'image/png', size_bytes: Buffer.from(PNG, 'base64').length }] : [], error: state === 'failed' ? { message: 'Model ran out of memory.' } : null, urls: { self: `/api/v2/jobs/${id}`, events: `/api/v2/jobs/${id}/events`, cancel: `/api/v2/jobs/${id}/cancel` } };
+    return { id, status: state, created_at: now, started_at: now, completed_at: ['succeeded', 'failed', 'canceled'].includes(state) ? now : null, expires_at: '2099-01-01T00:00:00Z', queue_position: null, progress: { value: state === 'succeeded' ? 1 : 0.25, nodes_done: 1, nodes_total: 3 }, outputs: state === 'succeeded' ? [{ id: `output-${id}`, node_id: outputNode, name: 'result.png', type: 'image', content_type: 'image/png', size_bytes: Buffer.from(PNG, 'base64').length }] : [], error: state === 'failed' ? { message: 'Model ran out of memory.' } : null, urls: { self: `/api/v2/jobs/${id}`, events: `/api/v2/jobs/${id}/events`, cancel: `/api/v2/jobs/${id}/cancel` } };
   }
   const fakeFetch = async (url, options = {}) => {
     const pathname = new URL(url).pathname;
@@ -91,7 +91,7 @@ function upstream() {
     if (/\/assets\/output-.*\/content$/.test(pathname)) return new Response(Buffer.from(PNG, 'base64'), { headers: { 'Content-Type': 'image/png' } });
     throw new Error(`Unexpected test endpoint ${pathname}`);
   };
-  return { records, submitted, seen, createClient: () => new Comfy({ apiKey: 'test-only', fetch: fakeFetch }), set nextState(value) { nextState = value; }, set cancelFailure(value) { cancelFailure = value; }, set cancelResponseState(value) { cancelResponseState = value; }, set afterCancelState(value) { afterCancelState = value; } };
+  return { records, submitted, seen, createClient: () => new Comfy({ apiKey: 'test-only', fetch: fakeFetch }), set nextState(value) { nextState = value; }, set outputNode(value) { outputNode = value; }, set cancelFailure(value) { cancelFailure = value; }, set cancelResponseState(value) { cancelResponseState = value; }, set afterCancelState(value) { afterCancelState = value; } };
 }
 
 test('active jobs rehydrate through the official SDK and completed media survives two API restarts', async (t) => {
@@ -448,4 +448,30 @@ test('the bundled keyframe workflow receives every guide frame, scales guide pos
   const retried = await api.call(`/api/jobs/${first.body.id}/retry`, {});
   assert.equal(retried.status, 202, JSON.stringify(retried.body));
   assert.equal(remote.submitted[2].workflow['15'].inputs.frame_idx, 36, 'retries keep their saved guide frames');
+});
+
+test('restyle submits the bundled image-edit graph with or without a look reference and returns the image', async (t) => {
+  const remote = upstream(), { start } = await fixture(t, { createClient: remote.createClient });
+  const api = await start({ fetchImpl: async () => Response.json({ jobs: [] }) });
+  assert.equal((await api.call('/api/health')).body.restyleAvailable, true);
+  remote.nextState = 'succeeded'; remote.outputNode = '16';
+  const plain = await api.call('/api/restyle', { image: `data:image/png;base64,${PNG}`, prompt: 'Make it real.', seed: 11 });
+  assert.equal(plain.status, 200, JSON.stringify(plain.body));
+  assert.equal(plain.body.image, `data:image/png;base64,${PNG}`);
+  const graph = remote.submitted[0].workflow;
+  assert.equal(graph['9'].inputs.prompt, 'Make it real.');
+  assert.equal(graph['14'].inputs.seed, 11);
+  assert.equal(graph['7'].inputs.image.__type, 'core/ASSET');
+  assert.equal(graph['17'], undefined, 'no reference loader without a reference');
+  assert.equal(graph['9'].inputs.image2, undefined);
+  const matched = await api.call('/api/restyle', { image: `data:image/png;base64,${PNG}`, reference: `data:image/png;base64,${PNG}`, prompt: 'Match image 2.' });
+  assert.equal(matched.status, 200, JSON.stringify(matched.body));
+  const referenced = remote.submitted[1].workflow;
+  assert.equal(referenced['17'].inputs.image.__type, 'core/ASSET');
+  assert.deepEqual(referenced['9'].inputs.image2, ['18', 0]);
+  assert.equal((await api.call('/api/restyle', { image: 'https://example.com/a.png', prompt: 'x' })).status, 400);
+  remote.nextState = 'failed';
+  const failed = await api.call('/api/restyle', { image: `data:image/png;base64,${PNG}`, prompt: 'Make it real.' });
+  assert.equal(failed.status, 502);
+  assert.match(failed.body.error, /restyle did not finish/);
 });

@@ -30,3 +30,9 @@ Verified October 16, 2026 on Apple M5 Max/MPS, 128 GB unified memory, ComfyUI re
 The workflow is a starting point for animating staged compositions. It does not guarantee object identity, exact motion paths, or toy-to-photorealistic transformation. Iterate on the image, prompt, model, and graph to achieve those effects. Import another tested API workflow in the studio to switch models.
 
 `bindings.example.json` is a mapping illustration for other graphs; its node IDs are placeholders and it is not executable.
+
+## Qwen-Image-Edit restyle
+
+`qwen-restyle.api.json` powers **Make keyframes real**. It is a core-node ComfyUI graph for Qwen-Image-Edit-2511 with the 4-step Lightning LoRA, following the official ComfyUI template: AuraFlow sampling shift 3.1, `CFGNorm`, and the `index_timestep_zero` reference method, at 4 steps and CFG 1. `ImageScaleToTotalPixels` (1 megapixel, 32-pixel steps) keeps the capture's aspect ratio, so a 1024×640 frame becomes 1280×800 and still lines up as an LTX guide.
+
+The server sets the instruction (node `9`), seed (`14`), stage capture (`7`), and an optional look reference (`17`). The studio restyles every keyframe on its own with the same instruction and seed. In testing, passing a restyled keyframe as the reference made the model copy it, so later keyframes lost their staged motion. The optional reference stays available to other clients; without one, the server removes the reference loader and the `image2` inputs. The required model files are listed in [the runtime guide](../docs/LOCAL-RUNTIME.md#restyle-models-optional).

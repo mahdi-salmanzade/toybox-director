@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { JobStore, publicJob, terminalJob, isJobId } from './job-store.mjs';
 import { createMovieTools, validateMovie } from './movies.mjs';
 import { productionFiles } from './production.mjs';
+import { RESTYLE_NODES, restyleGraph, validateRestyle } from './restyle.mjs';
 import { RequestError, validateWorkflow, validateBindings, workflowNodes, validateRender, mapDuration, durationInfo, validateMetadata, allowedStudioOrigins, guideWorkflow } from './validation.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -82,6 +83,11 @@ export async function createApp(options = {}) {
     }
     if (changed) await store.save(job.record);
   }
+  let restyleWorkflow = null;
+  try {
+    restyleWorkflow = validateWorkflow(JSON.parse(await readFile(options.restyleWorkflowPath ?? path.join(ROOT, 'workflows', 'qwen-restyle.api.json'), 'utf8')));
+  } catch (error) { if (error.code !== 'ENOENT') console.warn('The restyle workflow was not loaded:', safeError(error, config)); }
+  let restyling = 0;
   const allowedOrigins = allowedStudioOrigins(env);
   try {
     const stored = JSON.parse(await readFile(workflowPath, 'utf8'));
@@ -112,8 +118,8 @@ export async function createApp(options = {}) {
   };
 
   app.get('/api/health', async (_req, res) => {
-    if (!config.configured) return res.json({ connected: false, provider: 'unconfigured', workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), movieExportAvailable, message: 'Connect a local Comfy API proxy or add a Comfy Cloud API key in .env. See docs/COMFY.md.' });
-    if (healthCache && Date.now() - healthCache.time < 5000) return res.json({ ...healthCache.value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), movieExportAvailable });
+    if (!config.configured) return res.json({ connected: false, provider: 'unconfigured', workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable, message: 'Connect a local Comfy API proxy or add a Comfy Cloud API key in .env. See docs/COMFY.md.' });
+    if (healthCache && Date.now() - healthCache.time < 5000) return res.json({ ...healthCache.value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
     let value;
     try {
       getClient();
@@ -130,7 +136,7 @@ export async function createApp(options = {}) {
       value = { connected: false, provider: config.provider, message: `Cannot connect to Comfy. ${safeError(error, config)}` };
     }
     healthCache = { time: Date.now(), value };
-    return res.json({ ...value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), movieExportAvailable });
+    return res.json({ ...value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
   });
 
   app.get('/api/workflow', (_req, res) => res.json(saved ? { configured: true, ...saved, nodes: workflowNodes(saved.workflow), duration: durationInfo(saved.workflow, saved.bindings) } : { configured: false, workflow: null, bindings: null, nodes: [] }));
@@ -294,6 +300,28 @@ export async function createApp(options = {}) {
       return publicJob(record);
     } finally { if (reserved) submitting.render--; }
   }
+
+  // Restyle one stage capture with the bundled image-edit workflow and return the image.
+  app.post('/api/restyle', async (req, res) => {
+    const input = validateRestyle(req.body);
+    if (!restyleWorkflow) throw new RequestError('The restyle workflow is missing. Restore workflows/qwen-restyle.api.json.', 503);
+    const comfy = getClient();
+    if (restyling >= 2) throw new RequestError('Two restyles are already running. Wait for one to finish.', 429);
+    restyling++;
+    try {
+      const asset = (image) => comfy.assets.fromBytes(image.bytes, { filename: image.filename, contentType: image.contentType });
+      const wf = comfy.workflows.fromJson(restyleGraph(restyleWorkflow, input));
+      wf.setInput(RESTYLE_NODES.image, 'image', asset(input.image));
+      if (input.reference) wf.setInput(RESTYLE_NODES.reference, 'image', asset(input.reference));
+      const handle = await comfy.submit(wf, { signal: AbortSignal.timeout(120_000) });
+      try { await handle.result(AbortSignal.timeout(15 * 60_000)); }
+      catch (error) { throw new RequestError(`The restyle did not finish in Comfy. ${safeError(handle.error ?? error, config)}`, 502); }
+      const output = handle.getOutputs(RESTYLE_NODES.output).find((item) => ['image/png', 'image/jpeg', 'image/webp'].includes(item.contentType));
+      if (!output) throw new RequestError('Comfy finished without a restyled image.', 422);
+      const bytes = await output.toBytes({ timeoutMs: 120_000 });
+      res.json({ image: `data:${output.contentType};base64,${Buffer.from(bytes).toString('base64')}` });
+    } finally { restyling--; }
+  });
 
   app.post('/api/render', async (req, res) => res.status(202).json(await createRender(req.body, validateMetadata(req.body?.metadata))));
 

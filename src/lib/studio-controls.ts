@@ -25,10 +25,12 @@ export type GuideSource = {kind: 'photo'; image: string} | {kind: 'stage'; frame
 /** Choose the image for a workflow guide at a position (0–1] of the shot. */
 export function guideSource(shot: Shot, position: number): GuideSource {
   const step = position * (shot.frames.length - 1), index = Math.round(step);
+  // A reveal holds its toy opening through the middle, so the change lands late and fast.
+  if (shot.reveal && index > 0 && index < shot.frames.length - 1) return shot.frames[0].image ? {kind: 'photo', image: shot.frames[0].image} : {kind: 'skip'};
   const photo = Math.abs(step - index) < 1e-6 ? shot.frames[index]?.image : undefined;
   if (photo) return {kind: 'photo', image: photo};
-  // A photographed opening must not be steered toward the stage world's look.
-  if (shot.frames[0].image) return {kind: 'skip'};
+  // A photographed opening must not be steered toward the stage world's look, except by a reveal.
+  if (shot.frames[0].image && !shot.reveal) return {kind: 'skip'};
   return {kind: 'stage', frameIndex: Math.min(index, shot.frames.length - 1), time: position};
 }
 
