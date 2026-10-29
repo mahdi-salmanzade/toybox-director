@@ -58,11 +58,15 @@ The API is bound to localhost. This is a single-user local app, not a multi-tena
 - **Edit a keyframe in words**: describe a change ("the train enters a dark tunnel", "the toy becomes a real car") and Qwen-Image-Edit applies it to that keyframe, or builds it from the keyframe before it or any other keyframe of the scene. Chained edits keep the subject identical from keyframe to keyframe, which lets LTX morph smoothly between very different scenes. The first keyframe of a scene can continue from the previous scene's last keyframe.
 - **Toy → real reveal**: keyframe 1 becomes a real photograph of the toys on a tabletop and holds through the middle; by the last keyframe they are the real thing. Stage it once and render the toy-car-to-real-car transformation.
 - Save multiple projects in IndexedDB, switch between them, undo/redo edits, and export/import editable `.toybox.json` backups.
-- Generate real video through the bundled open-weight LTX 2B workflow, or import and map another Comfy API workflow.
+- Generate real video through a bundled open-weight starter: **LTX keyframes** (LTX-Video 2B, fast drafts) or **LTX keyframes HD** (LTX-Video 13B, 1024×576). Or import and map another Comfy API workflow.
 - Render every scene in a project as a batch, with up to 12 active render jobs. Stop adding unsubmitted shots, cancel individual active jobs, or retry failed and canceled renders.
 - Browse a durable render library across browser and API restarts; download media or explicitly delete a take and its files.
 - Add completed videos to a film, reorder and trim up to 24 clips, and export a silent 24 fps H.264 MP4 up to five minutes long. Two film exports can run concurrently.
 - Export shot direction and source frames for use elsewhere.
+
+![Eight keyframes made with the edit bar, above the LTX-Video 13B render at the same moments](docs/media/toy-to-real.jpg)
+
+*A toy car on a train window sill becomes a real car in a road tunnel. All of it was made in the studio: one car prop on a low camera, eight keyframes made with the edit bar (each from another keyframe, so the car stays the same car) and retimed to hold the dark, then one HD render. Guides are soft: at 2.3 seconds the tunnel wall is still sweeping in.*
 
 Keyboard: **Space** plays the stage; **1–8** selects a keyframe; **Cmd/Ctrl+Z** undoes; **Cmd/Ctrl+Shift+Z** redoes; **Cmd/Ctrl+S** exports the project. Numeric prop controls provide an alternative to dragging.
 
