@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addKeyframe, changeShotWorld, cloneShot, compilePrompt, describeMotion, frameTime, interpolatePose, makeProject, makeShot, parseProject, readImage, removeKeyframe, removeShot, reorderShot } from '../src/lib/project.ts';
+import { addKeyframe, changeShotWorld, cloneShot, compilePrompt, describeMotion, evenKeyframes, frameTime, interpolatePose, isRetimed, makeProject, makeShot, MIN_KEYFRAME_GAP, parseProject, readImage, removeKeyframe, removeShot, reorderShot, retimeKeyframe } from '../src/lib/project.ts';
 
 test('portable projects preserve every staging decision on round trip', () => {
   const project = makeProject();
@@ -247,3 +247,44 @@ test('a shot holds three to eight evenly spaced keyframes, and the stage moves t
   assert.equal(small.frames.length, 3, 'a shot keeps at least three keyframes');
   assert.equal(removeKeyframe(addKeyframe(small, 1), 2).frames.map(frame => frame.id).join(), small.frames.map(frame => frame.id).join());
 });
+
+test('a retimed keyframe moves in time, stays between its neighbours, and drives the stage', () => {
+  let shot = makeShot();
+  for (let index = 0; index < 2; index++) shot = addKeyframe(shot, 1);
+  const lead = shot.props[0].id;
+  shot.frames.forEach((frame, index) => { frame.poses[lead] = {x: index, z: 0, rotation: 0}; });
+  assert.equal(isRetimed(shot), false);
+  shot = retimeKeyframe(shot, 1, .1);
+  assert.equal(isRetimed(shot), true);
+  assert.deepEqual(shot.frames.map((_, i) => +frameTime(shot, i).toFixed(4)), [0, .1, .5, .75, 1]);
+  assert.deepEqual(interpolatePose(shot, lead, .1), {x: 1, z: 0, rotation: 0}, 'the stage reaches keyframe 2 at its new time');
+  assert.equal(interpolatePose(shot, lead, .3).x, 1.5, 'and eases to keyframe 3 from there');
+  assert.equal(frameTime(retimeKeyframe(shot, 2, .01), 2), .1 + MIN_KEYFRAME_GAP, 'a keyframe cannot pass the one before it');
+  assert.equal(frameTime(retimeKeyframe(shot, 2, 2), 2), .75 - MIN_KEYFRAME_GAP, 'or the one after it');
+  assert.equal(retimeKeyframe(shot, 0, .5), shot, 'the first and last keyframes are fixed');
+  assert.equal(retimeKeyframe(shot, 4, .5), shot);
+  const added = addKeyframe(shot, 0);
+  assert.deepEqual(added.frames.map((_, i) => +frameTime(added, i).toFixed(4)), [0, .05, .1, .5, .75, 1], 'an in-between lands halfway to the next keyframe');
+  const atEnd = addKeyframe(shot, 4);
+  assert.deepEqual(atEnd.frames.map((_, i) => +frameTime(atEnd, i).toFixed(4)), [0, .1, .5, .75, .875, 1]);
+  const even = evenKeyframes(shot);
+  assert.equal(isRetimed(even), false);
+  assert.deepEqual(even.frames.map((_, i) => frameTime(even, i)), [0, .25, .5, .75, 1]);
+});
+
+test('keyframe times survive import, and invalid or out-of-order times are rejected', () => {
+  const project = makeProject();
+  project.shots[0] = retimeKeyframe(project.shots[0], 1, .2);
+  assert.deepEqual(parseProject(JSON.stringify(project)), project);
+  const tooLate = structuredClone(project); tooLate.shots[0].frames[1].time = 1.5;
+  assert.throws(() => parseProject(JSON.stringify(tooLate)), /invalid keyframe time/);
+  const outOfOrder = addKeyframeAt(project, .1);
+  assert.throws(() => parseProject(JSON.stringify(outOfOrder)), /out of order/);
+});
+
+function addKeyframeAt(project: ReturnType<typeof makeProject>, time: number) {
+  const copy = structuredClone(project);
+  copy.shots[0] = addKeyframe(copy.shots[0], 1);
+  copy.shots[0].frames[2].time = time;
+  return copy;
+}

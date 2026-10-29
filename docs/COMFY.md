@@ -121,7 +121,7 @@ npm run test:server
 curl http://127.0.0.1:3001/api/health
 ```
 
-The automated suite uses the real SDK against controlled protocol responses to test uploads, widget substitution, restart recovery, cancellation, retries, idempotency, exact downloaded bytes, and failure handling. It also exercises real FFmpeg trimming/concatenation and production file boundaries. These checks are distinct from GPU generation. The current complete test run has 75 passing tests; current browser and runtime evidence is recorded in [VERIFICATION.md](./VERIFICATION.md) and [LOCAL-RUNTIME.md](./LOCAL-RUNTIME.md).
+The automated suite uses the real SDK against controlled protocol responses to test uploads, widget substitution, restart recovery, cancellation, retries, idempotency, exact downloaded bytes, and failure handling. It also exercises real FFmpeg trimming/concatenation and production file boundaries. These checks are distinct from GPU generation. The current complete test run has 110 passing tests; current browser and runtime evidence is recorded in [VERIFICATION.md](./VERIFICATION.md) and [LOCAL-RUNTIME.md](./LOCAL-RUNTIME.md).
 
 The original complete Toybox HTTP path was also exercised against the installed LTX model on October 16, 2026: `POST /render` uploaded the lunar source, applied the saved graph and 2-second frame mapping, and `GET /jobs/:id` returned a completed video. The cached file downloaded through `/api/outputs` was a 641,286-byte H.264 MP4, 512×320, 49 frames at 24 FPS (~2.04 seconds). Local verification details are saved in `.toybox/backend-verification.json`; this is actual model execution, distinct from the controlled automated tests.
 

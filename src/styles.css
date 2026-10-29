@@ -172,8 +172,11 @@ input[type=range]:hover::-webkit-slider-thumb{background:var(--orange)}
 .storyboard-heading>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .storyboard-heading h2{font-size:11px;letter-spacing:-.15px}
 .storyboard-heading>div>span{font-size:11px;color:#606954}
+.storyboard-heading>.storyboard-actions{align-items:center}
 .text-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#606954;white-space:nowrap}
 .text-button:hover{color:#405635}
+.keyframe-time{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#606954;white-space:nowrap}
+.keyframe-time input{width:52px;min-height:26px;padding:3px 6px;font-size:11px;border:1px solid #dde3d1;background:#f8faf1;border-radius:5px;color:#2f3a28}
 .frame-strip{display:flex;gap:12px;overflow-x:auto;scrollbar-width:thin}
 .frame-strip>.frame-card{flex:1 1 0;min-width:104px}
 .add-keyframe{flex:0 0 44px;display:flex;align-items:center;justify-content:center;border:1px dashed #c9cdbb;border-radius:7px;color:#606954;background:transparent}
@@ -306,6 +309,14 @@ kbd{font:inherit;font-size:11px;border:1px solid #daddcf;border-radius:3px;backg
 .workflow-title p{font-size:11px;line-height:1.6;color:#606954;margin-top:5px}
 .status-label{display:flex;align-items:center;gap:5px;font-size:11px;color:#606954;white-space:nowrap}
 .workflow-upload{display:flex;align-items:center;gap:12px;width:100%;padding:18px 14px;border:1px dashed #c9d7b7;border-radius:8px;background:#f4f8ed;color:#606954;text-align:left}
+.starter-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:10px}
+.starter{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;text-align:left;border:1px solid #dedfd4;border-radius:7px;background:var(--white)}
+.starter span:first-child{display:grid;gap:2px}
+.starter strong{font-size:12px}
+.starter small{font-size:11px;color:var(--muted)}
+.starter:not(:disabled):hover{border-color:#b9c4a6}
+.starter.is-active{border-color:#9db08a;background:#f6f9ef}
+.starter-use{font-size:11px;color:var(--green);font-weight:600}
 .workflow-upload:hover{background:#eaf3df;border-color:#a7bf8b}
 .workflow-upload>span{flex:1;min-width:0}
 .workflow-upload strong{display:block;font-size:11px;color:#606954}

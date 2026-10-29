@@ -5,7 +5,7 @@ export type PropKind = 'car' | 'mug' | 'arch' | 'sphere' | 'tree';
 export type WorldId = 'desert' | 'lunar' | 'noir';
 export type Pose = { x: number; z: number; rotation: number };
 export type StageProp = { id: string; name: string; kind: PropKind; role: string; color: string; scale: number };
-export type Frame = { id: string; label: string; poses: Record<string, Pose>; image?: string };
+export type Frame = { id: string; label: string; poses: Record<string, Pose>; image?: string; time?: number };
 export type Shot = {
   id: string; name: string; note: string; world: WorldId; props: StageProp[]; frames: Frame[];
   duration: number; prompt: string; camera: 'wide' | 'low' | 'overhead'; cameraMove: CameraMove; seed: number;
@@ -134,22 +134,49 @@ export function compilePrompt(shot: Shot): string {
   return `${shot.prompt}\nWorld: ${world.prompt}.\nCast: ${cast}.\nCamera: ${angle}. ${move}\nMotion: ${describeMotion(shot)}${reveal}`;
 }
 export const MIN_KEYFRAMES = 3, MAX_KEYFRAMES = 8;
-/** Where a keyframe sits in the shot (0–1); keyframes are evenly spaced. */
-export const frameTime = (shot: Shot, index: number) => index / (shot.frames.length - 1);
+/** Where a keyframe sits in the shot (0–1). Keyframes are evenly spaced until one is retimed. */
+export function frameTime(shot: Shot, index: number): number {
+  const last = shot.frames.length - 1;
+  if (index <= 0) return 0;
+  if (index >= last) return 1;
+  return shot.frames[index].time ?? index / last;
+}
+export const isRetimed = (shot: Shot) => shot.frames.some(frame => frame.time !== undefined);
+/** Retimed keyframes stay at least this far apart (a fraction of the shot). */
+export const MIN_KEYFRAME_GAP = .01;
+const withTimes = (shot: Shot, frames: Frame[], times: number[]): Shot => ({ ...shot, frames: frames.map((frame, i) => ({ ...frame, time: times[i] })) });
 /** Insert an in-between keyframe after `index`, starting from that keyframe's staging. */
 export function addKeyframe(shot: Shot, index: number): Shot {
   if (shot.frames.length >= MAX_KEYFRAMES) return shot;
   const frame: Frame = { id: uid(), label: 'In between', poses: structuredClone(shot.frames[index].poses) };
-  return { ...shot, frames: [...shot.frames.slice(0, index + 1), frame, ...shot.frames.slice(index + 1)] };
+  const frames = [...shot.frames.slice(0, index + 1), frame, ...shot.frames.slice(index + 1)];
+  if (!isRetimed(shot)) return { ...shot, frames };
+  // A retimed shot keeps its timing: the new keyframe lands halfway to the next one.
+  const times = shot.frames.map((_, i) => frameTime(shot, i)), last = times.length - 1;
+  if (index < last) return withTimes(shot, frames, [...times.slice(0, index + 1), (times[index] + times[index + 1]) / 2, ...times.slice(index + 1)]);
+  return withTimes(shot, frames, [...times.slice(0, last), (times[last - 1] + 1) / 2, 1]);
+}
+/** Move a middle keyframe to `time` (0–1), keeping it between its neighbours. */
+export function retimeKeyframe(shot: Shot, index: number, time: number): Shot {
+  const last = shot.frames.length - 1;
+  if (index <= 0 || index >= last || !Number.isFinite(time)) return shot;
+  const times = shot.frames.map((_, i) => frameTime(shot, i));
+  times[index] = Math.min(Math.max(time, times[index - 1] + MIN_KEYFRAME_GAP), times[index + 1] - MIN_KEYFRAME_GAP);
+  return withTimes(shot, shot.frames, times);
+}
+export function evenKeyframes(shot: Shot): Shot {
+  return { ...shot, frames: shot.frames.map(({ time: _time, ...frame }) => frame) };
 }
 export function removeKeyframe(shot: Shot, index: number): Shot {
   return shot.frames.length <= MIN_KEYFRAMES ? shot : { ...shot, frames: shot.frames.filter((_, i) => i !== index) };
 }
 export function interpolatePose(shot: Shot, id: string, time: number): Pose {
   time = Number.isFinite(time) ? Math.max(0, Math.min(time, 1)) : 0;
-  const spans = shot.frames.length - 1;
-  const index = Math.min(Math.floor(time * spans), spans - 1);
-  const t = Math.min(time * spans - index, 1);
+  const last = shot.frames.length - 1;
+  let index = 0;
+  while (index < last - 1 && time >= frameTime(shot, index + 1)) index++;
+  const start = frameTime(shot, index), end = frameTime(shot, index + 1);
+  const t = end > start ? Math.min(Math.max((time - start) / (end - start), 0), 1) : 1;
   const smooth = t * t * (3 - 2 * t);
   const a = shot.frames[index].poses[id]; const b = shot.frames[index + 1].poses[id];
   return { x: a.x + (b.x - a.x) * smooth, z: a.z + (b.z - a.z) * smooth, rotation: a.rotation + (b.rotation - a.rotation) * smooth };
@@ -183,14 +210,17 @@ export function parseProject(raw: string): Project {
       if (!object(f) || !validId(f.id) || frameIds.has(f.id) || !shortText(f.label) || !object(f.poses)) throw new Error('This project has an invalid keyframe.');
       frameIds.add(f.id);
       if (f.image !== undefined && (typeof f.image !== 'string' || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(f.image) || f.image.length > 7_000_000)) throw new Error('A frame image is unsupported or too large.');
+      if (f.time !== undefined && !finite(f.time, 0, 1)) throw new Error('This project has an invalid keyframe time.');
       const poses: Record<string, Pose> = {};
       for (const id of propIds) {
         const pose = f.poses[id];
         if (!object(pose) || !finite(pose.x, -6, 6) || !finite(pose.z, -4, 4) || !finite(pose.rotation, -Math.PI * 2, Math.PI * 2)) throw new Error('This project has invalid object positions.');
         poses[id] = { x: pose.x, z: pose.z, rotation: pose.rotation };
       }
-      return { id: f.id, label: f.label, poses, ...(typeof f.image === 'string' ? { image: f.image } : {}) };
+      return { id: f.id, label: f.label, poses, ...(typeof f.image === 'string' ? { image: f.image } : {}), ...(typeof f.time === 'number' ? { time: f.time } : {}) };
     });
+    const times = frames.map((_, i) => i === 0 ? 0 : i === frames.length - 1 ? 1 : frames[i].time ?? i / (frames.length - 1));
+    if (times.some((time, i) => i > 0 && time <= times[i - 1])) throw new Error('This project has keyframes out of order in time.');
     if (s.cameraMove !== undefined && !isCameraMove(s.cameraMove)) throw new Error('This project contains an unknown camera move.');
     if (s.reveal !== undefined && typeof s.reveal !== 'boolean') throw new Error('This project contains an invalid reveal setting.');
     // Projects saved before camera moves keep their original locked camera.

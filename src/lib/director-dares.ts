@@ -18,7 +18,7 @@ export function makeDareShot(source: Shot, id: DareId): Shot {
   const shot = cloneShot(source);
   const lead = shot.props[0];
   const leadName = lead.name || 'the lead prop';
-  shot.frames.forEach(frame => { delete frame.image; });
+  shot.frames.forEach(frame => { delete frame.image; delete frame.time; });
   // Each dare stages a beginning, middle, and end.
   const last = shot.frames.length - 1;
   shot.frames = [shot.frames[0], shot.frames[Math.round(last / 2)], shot.frames[last]];

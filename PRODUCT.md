@@ -24,7 +24,7 @@ Compose a miniature stage, assign cinematic identities to props, set beginning/m
 
 ## Capabilities and Constraints
 
-Version 0.2 supports a virtual stage, three to eight keyframes per shot, keyframe editing in words, three cinematic worlds, photo inputs, multiple autosaved projects, import/export, and server-side Comfy integration. Projects live in browser IndexedDB and are separate for each origin and port. Export/import is the migration path between development and production addresses or browsers.
+Version 0.2 supports a virtual stage, three to eight keyframes per shot at times the director sets, keyframe editing in words, an HD (LTX-Video 13B) starter workflow, three cinematic worlds, photo inputs, multiple autosaved projects, import/export, and server-side Comfy integration. Projects live in browser IndexedDB and are separate for each origin and port. Export/import is the migration path between development and production addresses or browsers.
 
 The render library persists metadata, source inputs, workflows, job IDs, and output files under `.toybox`. It recovers accepted jobs after API restarts and indexes older local output folders. Batch rendering can queue up to 12 shots; users can stop adding shots, cancel individual active jobs, retry failed/canceled renders, and explicitly delete completed media. No automatic output pruning occurs.
 
@@ -38,7 +38,7 @@ The interface treats a miniature stage as a useful filmmaking instrument, with c
 
 ## Evidence on Hand
 
-Local ComfyUI and the official API proxy were installed with pinned model sources and verified hashes. Real LTX renders, browser workflows on desktop and mobile, persistent project and render recovery, and actual FFmpeg film export have been tested. The current pass reports 106 automated tests and a guided-versus-unguided render comparison. Detailed results belong in `docs/VERIFICATION.md`; installation and model licensing remain in `docs/LOCAL-RUNTIME.md`.
+Local ComfyUI and the official API proxy were installed with pinned model sources and verified hashes. Real LTX renders, browser workflows on desktop and mobile, persistent project and render recovery, and actual FFmpeg film export have been tested. The current pass reports 110 automated tests and a guided-versus-unguided render comparison. Detailed results belong in `docs/VERIFICATION.md`; installation and model licensing remain in `docs/LOCAL-RUNTIME.md`.
 
 ## Product Principles
 

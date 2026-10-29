@@ -1,0 +1,427 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "ltxv-13b-0.9.8-distilled.safetensors"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "t5xxl_fp16.safetensors",
+      "type": "ltxv",
+      "device": "cpu"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "A little red car drives through a monumental sandstone canyon at golden hour. The camera slowly pushes in. Practical miniature photography, consistent materials and geometry, realistic motion and lighting."
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "worst quality, inconsistent motion, deformed, blurry, flickering, warped geometry"
+    }
+  },
+  "5": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-first-frame.webp"
+    },
+    "_meta": {
+      "title": "Keyframe 1 (start)"
+    }
+  },
+  "6": {
+    "class_type": "LTXVImgToVideo",
+    "inputs": {
+      "positive": [
+        "3",
+        0
+      ],
+      "negative": [
+        "4",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "image": [
+        "5",
+        0
+      ],
+      "width": 1024,
+      "height": 576,
+      "length": 241,
+      "batch_size": 1,
+      "strength": 1.0
+    }
+  },
+  "14": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-2.png"
+    },
+    "_meta": {
+      "title": "Keyframe 2 (middle)"
+    }
+  },
+  "15": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "6",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "6",
+        2
+      ],
+      "image": [
+        "14",
+        0
+      ],
+      "frame_idx": 36,
+      "strength": 0.8
+    },
+    "_meta": {
+      "title": "Guide: keyframe 2"
+    }
+  },
+  "16": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-3.png"
+    },
+    "_meta": {
+      "title": "Keyframe 3 (end)"
+    }
+  },
+  "17": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "15",
+        0
+      ],
+      "negative": [
+        "15",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "15",
+        2
+      ],
+      "image": [
+        "16",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    },
+    "_meta": {
+      "title": "Guide: keyframe 3"
+    }
+  },
+  "19": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-4.png"
+    }
+  },
+  "20": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "17",
+        0
+      ],
+      "negative": [
+        "17",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "17",
+        2
+      ],
+      "image": [
+        "19",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-5.png"
+    }
+  },
+  "22": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "20",
+        0
+      ],
+      "negative": [
+        "20",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "20",
+        2
+      ],
+      "image": [
+        "21",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-6.png"
+    }
+  },
+  "24": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "22",
+        2
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-7.png"
+    }
+  },
+  "26": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "negative": [
+        "24",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "24",
+        2
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "27": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-8.png"
+    }
+  },
+  "28": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "negative": [
+        "26",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "26",
+        2
+      ],
+      "image": [
+        "27",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "7": {
+    "class_type": "LTXVConditioning",
+    "inputs": {
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "28",
+        1
+      ],
+      "frame_rate": 24
+    }
+  },
+  "8": {
+    "class_type": "ManualSigmas",
+    "inputs": {
+      "sigmas": "1.0, 0.9937, 0.9875, 0.9812, 0.9750, 0.9094, 0.7250, 0.4219, 0.0"
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "10": {
+    "class_type": "SamplerCustom",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "add_noise": true,
+      "noise_seed": 42,
+      "cfg": 1.0,
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "7",
+        1
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "8",
+        0
+      ],
+      "latent_image": [
+        "28",
+        2
+      ]
+    }
+  },
+  "18": {
+    "class_type": "LTXVCropGuides",
+    "inputs": {
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "7",
+        1
+      ],
+      "latent": [
+        "10",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Remove guide frames"
+    }
+  },
+  "11": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "18",
+        2
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    }
+  },
+  "12": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "11",
+        0
+      ],
+      "fps": 24.0
+    }
+  },
+  "13": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "12",
+        0
+      ],
+      "filename_prefix": "toybox/shot",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}

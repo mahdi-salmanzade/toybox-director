@@ -2,6 +2,8 @@
 
 `ltx-keyframes.api.json` is a runnable, inference-tested ComfyUI API graph using core nodes only. Its matching mappings are in `ltx-keyframes.bindings.json`. `npm run setup:local -- --start` initializes the studio with these files when no workflow is already configured.
 
+`ltx-keyframes-hd.api.json` is the same graph with LTX-Video 13B at 1024×576 (same mappings, in `ltx-keyframes-hd.bindings.json`). Both are offered under **Render settings → Starter workflows**, which installs a graph together with its mappings; selecting either starter file through **Import workflow JSON** also brings its mappings along. The 13B checkpoint is listed in [the runtime guide](../docs/LOCAL-RUNTIME.md#hd-starter-optional).
+
 Required model files:
 
 | Model | ComfyUI location |
@@ -21,7 +23,7 @@ The graph encodes the opening keyframe with `LTXVImgToVideo`, adds later keyfram
  "bypass": {"nodeId": "17", "outputs": ["positive", "negative", "latent"]}}
 ```
 
-`/api/health` reports the configured guide positions as `keyframeGuides` and the number of guides with a `frame` widget as `keyframeSlots`. When a shot's later keyframes fit in `keyframeSlots`, the studio sends a `positions` list (one time per keyframe, evenly spaced) and each guide lands at its keyframe's time; otherwise it captures the fixed `keyframeGuides` positions from the 3D stage.
+`/api/health` reports the configured guide positions as `keyframeGuides` and the number of guides with a `frame` widget as `keyframeSlots`. When a shot's later keyframes fit in `keyframeSlots`, the studio sends a `positions` list (each keyframe's time in the shot: evenly spaced, or wherever the director set it) and each guide lands there; otherwise it captures the fixed `keyframeGuides` positions from the 3D stage.
 
 The duration binding converts studio seconds to the nearest `8n+1` frames at 24 FPS. Thus 2 seconds produces 49 frames (~2.04 seconds) and 6 seconds produces 145 frames (~6.04 seconds). The submitted response reports the resulting duration. Longer clips need more memory and execution time.
 

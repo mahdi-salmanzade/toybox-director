@@ -67,6 +67,8 @@ test('a keyframe edit starts from this keyframe, the one before it, or the previ
   assert.deepEqual(editSource(shots, second.id, 0, 'previous'), {shot: first, index: 2}, 'a scene continues from the last one');
   assert.equal(editSource(shots, first.id, 0, 'previous'), null);
   assert.equal(editSource(shots, 'missing', 0, 'this'), null);
+  assert.deepEqual(editSource(shots, second.id, 0, 2), {shot: second, index: 2}, 'any keyframe of the scene can be the source');
+  assert.equal(editSource(shots, second.id, 0, 9), null);
 });
 
 test('photo keyframes are directed by the prompt and camera alone', () => {
@@ -82,4 +84,13 @@ test('many keyframes restyle in even strips of up to four', async () => {
   assert.deepEqual(stripGroups([0, 1, 2]), [[0, 1, 2]]);
   assert.deepEqual(stripGroups([0, 1, 2, 3, 4]), [[0, 1, 2], [3, 4]]);
   assert.deepEqual(stripGroups([1, 2, 3, 4, 5, 6, 7]), [[1, 2, 3, 4], [5, 6, 7]]);
+});
+
+test('guides follow retimed keyframes: a photo is used only where its keyframe sits', async () => {
+  const { retimeKeyframe, makeShot, addKeyframe, frameTime } = await import('../src/lib/project.ts');
+  let shot = addKeyframe(makeShot(), 1);
+  shot = retimeKeyframe(shot, 1, .2);
+  shot.frames[1].image = 'data:image/png;base64,AA==';
+  assert.deepEqual(guideSource(shot, frameTime(shot, 1)), {kind: 'photo', image: shot.frames[1].image});
+  assert.deepEqual(guideSource(shot, frameTime(shot, 2)), {kind: 'stage', frameIndex: 2, time: frameTime(shot, 2)});
 });

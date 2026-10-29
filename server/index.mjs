@@ -11,6 +11,11 @@ import { RESTYLE_NODES, restyleGraph, validateRestyle } from './restyle.mjs';
 import { RequestError, validateWorkflow, validateBindings, workflowNodes, validateRender, mapDuration, durationInfo, validateMetadata, allowedStudioOrigins, guideWorkflow } from './validation.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Bundled starters ship a graph and its mappings together, so keyframe guides are never lost on import.
+export const STARTERS = [
+  { id: 'ltx-keyframes', name: 'LTX keyframes', detail: 'LTX-Video 2B · 512×320 · fast drafts' },
+  { id: 'ltx-keyframes-hd', name: 'LTX keyframes HD', detail: 'LTX-Video 13B · 1024×576 · about 10 minutes a shot on an Apple M5 Max' },
+];
 
 const MAX_OUTPUT_BYTES = 256 * 1024 * 1024;
 const TERMINAL_CONFIRMATION_MS = 30_000;
@@ -139,18 +144,36 @@ export async function createApp(options = {}) {
     return res.json({ ...value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), keyframeSlots: guideSlots(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
   });
 
-  app.get('/api/workflow', (_req, res) => res.json(saved ? { configured: true, ...saved, nodes: workflowNodes(saved.workflow), duration: durationInfo(saved.workflow, saved.bindings) } : { configured: false, workflow: null, bindings: null, nodes: [] }));
-  app.post('/api/workflow', async (req, res) => {
-    const workflow = validateWorkflow(req.body?.workflow);
-    // Validation-only supports inspecting widgets before committing mappings.
-    if (req.body.inspect === true) return res.json({ configured: false, workflow, nodes: workflowNodes(workflow) });
-    const bindings = validateBindings(req.body.bindings, workflow);
+  const starters = new Map();
+  for (const starter of STARTERS) {
+    try {
+      const read = (suffix) => readFile(path.join(options.workflowsDir ?? path.join(ROOT, 'workflows'), `${starter.id}.${suffix}.json`), 'utf8');
+      const workflow = validateWorkflow(JSON.parse(await read('api')));
+      starters.set(starter.id, { ...starter, workflow, bindings: validateBindings(JSON.parse(await read('bindings')), workflow) });
+    } catch { /* A missing or edited starter is simply not offered. */ }
+  }
+  const starterFor = (workflow) => [...starters.values()].find((starter) => JSON.stringify(starter.workflow) === JSON.stringify(workflow));
+  const saveWorkflow = async (workflow, bindings) => {
     await mkdir(dataDir, { recursive: true, mode: 0o700 });
     const temp = `${workflowPath}.${randomUUID()}.tmp`;
     await writeFile(temp, JSON.stringify({ workflow, bindings }, null, 2), { mode: 0o600 });
     await rename(temp, workflowPath);
     saved = { workflow, bindings };
-    return res.json({ configured: true, ...saved, nodes: workflowNodes(workflow), duration: durationInfo(workflow, bindings) });
+    return { configured: true, ...saved, nodes: workflowNodes(workflow), duration: durationInfo(workflow, bindings) };
+  };
+  app.get('/api/starters', (_req, res) => res.json([...starters.values()].map(({ id, name, detail, workflow }) => ({ id, name, detail, active: Boolean(saved) && JSON.stringify(saved.workflow) === JSON.stringify(workflow) }))));
+  app.post('/api/workflow/starter', async (req, res) => {
+    const starter = starters.get(req.body?.id);
+    if (!starter) throw new RequestError('Choose one of the bundled starter workflows.', 404);
+    return res.json(await saveWorkflow(starter.workflow, starter.bindings));
+  });
+  app.get('/api/workflow', (_req, res) => res.json(saved ? { configured: true, ...saved, nodes: workflowNodes(saved.workflow), duration: durationInfo(saved.workflow, saved.bindings) } : { configured: false, workflow: null, bindings: null, nodes: [] }));
+  app.post('/api/workflow', async (req, res) => {
+    const workflow = validateWorkflow(req.body?.workflow);
+    // Validation-only supports inspecting widgets before committing mappings.
+    // A bundled starter brings its own mappings, including the keyframe guides.
+    if (req.body.inspect === true) return res.json({ configured: false, workflow, nodes: workflowNodes(workflow), ...(starterFor(workflow) ? { bindings: starterFor(workflow).bindings } : {}) });
+    return res.json(await saveWorkflow(workflow, validateBindings(req.body.bindings, workflow)));
   });
 
   const persist = async (job) => {

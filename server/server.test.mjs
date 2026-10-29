@@ -106,6 +106,25 @@ test('workflow inspection and persistence retain exact node bindings', async (t)
   assert.deepEqual(retrieved.bindings, bindings);
 });
 
+test('bundled starters install with their keyframe mappings, and an imported starter graph brings them along', async (t) => {
+  const { request, dataDir } = await serve(t);
+  const listed = await (await request('/api/starters')).json();
+  assert.deepEqual(listed.map((item) => [item.id, item.active]), [['ltx-keyframes', false], ['ltx-keyframes-hd', false]]);
+  const hd = await request('/api/workflow/starter', { id: 'ltx-keyframes-hd' });
+  assert.equal(hd.status, 200);
+  const stored = JSON.parse(await readFile(path.join(dataDir, 'workflow.json'), 'utf8'));
+  assert.equal(stored.workflow['1'].inputs.ckpt_name, 'ltxv-13b-0.9.8-distilled.safetensors');
+  assert.equal(stored.bindings.keyframes.length, 7, 'every keyframe guide slot is mapped');
+  assert.equal(stored.bindings.duration.unit, 'frames');
+  assert.deepEqual((await (await request('/api/starters')).json()).map((item) => item.active), [false, true]);
+  assert.equal((await (await request('/api/health')).json()).keyframeSlots, 7);
+  const graph = JSON.parse(await readFile(new URL('../workflows/ltx-keyframes.api.json', import.meta.url), 'utf8'));
+  const inspected = await (await request('/api/workflow', { workflow: graph, inspect: true })).json();
+  assert.equal(inspected.bindings.keyframes.length, 7, 'selecting the starter file keeps its guides');
+  assert.equal((await (await request('/api/workflow', { workflow, inspect: true })).json()).bindings, undefined);
+  for (const id of ['constructor', '__proto__', '../ltx-keyframes', 'missing']) assert.equal((await request('/api/workflow/starter', { id })).status, 404);
+});
+
 test('local browser boundary rejects foreign origins and DNS-rebinding hosts', async (t) => {
   const { request, origin } = await serve(t);
   assert.equal((await request('/api/workflow', { workflow, bindings }, { Origin: 'https://untrusted.example' })).status, 403);

@@ -1,0 +1,142 @@
+{
+  "image": {
+    "nodeId": "5",
+    "input": "image"
+  },
+  "keyframes": [
+    {
+      "nodeId": "14",
+      "input": "image",
+      "position": 0.5,
+      "frame": {
+        "nodeId": "15",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "15",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "16",
+      "input": "image",
+      "position": 1,
+      "frame": {
+        "nodeId": "17",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "17",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "19",
+      "input": "image",
+      "frame": {
+        "nodeId": "20",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "20",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "21",
+      "input": "image",
+      "frame": {
+        "nodeId": "22",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "22",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "23",
+      "input": "image",
+      "frame": {
+        "nodeId": "24",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "24",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "25",
+      "input": "image",
+      "frame": {
+        "nodeId": "26",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "26",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "27",
+      "input": "image",
+      "frame": {
+        "nodeId": "28",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "28",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    }
+  ],
+  "prompt": {
+    "nodeId": "3",
+    "input": "text"
+  },
+  "negativePrompt": {
+    "nodeId": "4",
+    "input": "text"
+  },
+  "seed": {
+    "nodeId": "10",
+    "input": "noise_seed"
+  },
+  "duration": {
+    "nodeId": "6",
+    "input": "length",
+    "unit": "frames",
+    "fps": 24,
+    "frameStep": 8
+  },
+  "outputNodeId": "13"
+}

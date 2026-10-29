@@ -51,6 +51,22 @@ Expected SHA-256 values:
 6e480b09fae049a72d2a8c5fbccb8d3e92febeb233bbe9dfe7256958a9167635  t5xxl_fp16.safetensors
 ```
 
+### HD starter (optional)
+
+The **LTX keyframes HD** starter (`workflows/ltx-keyframes-hd.api.json`) is the same graph with LTX-Video 13B at 1024×576. Choose it under **Render settings → Starter workflows**. It uses the same T5 encoder plus one more checkpoint:
+
+| File | Directory under ComfyUI | Download size | License |
+| --- | --- | --- | --- |
+| `ltxv-13b-0.9.8-distilled.safetensors` | `models/checkpoints/` | 28.58 GB | LTXV Open Weights License 0.X |
+
+- [LTX-Video 13B download](https://huggingface.co/Lightricks/LTX-Video/resolve/8984fa25007f376c1a299016d0957a37a2f797bb/ltxv-13b-0.9.8-distilled.safetensors)
+
+```text
+2c5f814744f04d8118e0b5bbfc0742655b51e41a6c090da66fde2936d651a9c9  ltxv-13b-0.9.8-distilled.safetensors
+```
+
+On this Apple M5 Max (128 GB), a 10-second HD shot (241 frames) takes about ten minutes.
+
 ## Restyle models (optional)
 
 **Make keyframes real** restyles each stage capture with Qwen-Image-Edit-2511 before it guides LTX. The studio, staging, and rendering all work without these files; only that action needs them. They total about 59 GB. Use the bf16 files: Apple MPS does not run the fp8 builds.
