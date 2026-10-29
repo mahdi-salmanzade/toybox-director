@@ -14,7 +14,7 @@ export type Shot = {
 };
 export type MovieClip = { id: string; jobId: string; outputIndex: number; inPoint: number; outPoint?: number };
 export type Project = { version: 1; id: string; name: string; shots: Shot[]; activeShotId: string; edit?: { clips: MovieClip[] } };
-export type Health = { connected: boolean; provider?: string; message: string; workflowConfigured?: boolean; keyframeGuides?: number[]; restyleAvailable?: boolean };
+export type Health = { connected: boolean; provider?: string; message: string; workflowConfigured?: boolean; keyframeGuides?: number[]; keyframeSlots?: number; restyleAvailable?: boolean };
 export type RenderJob = { id: string; status: 'queued' | 'running' | 'completed' | 'failed'; progress?: number; outputs?: { url: string; type: string }[]; error?: string };
 export const worlds: {id: WorldId; name: string; subtitle: string; image: string; prompt: string; color: string}[] = [
   { id: 'desert', name: 'Dune roads', subtitle: 'Warm · cinematic', image: '/images/desert-escape.webp', color: '#c4976a', prompt: 'a monumental sandstone canyon, winding desert highway, dusty golden-hour light, warm ochre palette, cinematic 35mm film' },
@@ -128,13 +128,28 @@ export function compilePrompt(shot: Shot): string {
   const cast = shot.props.map(prop => `${prop.name} represents ${prop.role}`).join('. ');
   const angle = shot.camera === 'low' ? 'Low angle close to the ground' : shot.camera === 'overhead' ? 'Overhead establishing shot' : 'Wide three-quarter view';
   const move = cameraMoves.find(item => item.id === shot.cameraMove)!.direction;
+  // Photo keyframes already fix the world, cast, and staging; describing the stage would fight them.
+  if (shot.frames.every(frame => frame.image)) return `${shot.prompt}\nCamera: ${move}`;
   const reveal = shot.reveal ? '\nTransformation: The shot opens on toys on a tabletop and holds still. Then, in one fast seamless transformation, the tabletop becomes the real world and every toy becomes the real thing it represents.' : '';
   return `${shot.prompt}\nWorld: ${world.prompt}.\nCast: ${cast}.\nCamera: ${angle}. ${move}\nMotion: ${describeMotion(shot)}${reveal}`;
 }
+export const MIN_KEYFRAMES = 3, MAX_KEYFRAMES = 8;
+/** Where a keyframe sits in the shot (0–1); keyframes are evenly spaced. */
+export const frameTime = (shot: Shot, index: number) => index / (shot.frames.length - 1);
+/** Insert an in-between keyframe after `index`, starting from that keyframe's staging. */
+export function addKeyframe(shot: Shot, index: number): Shot {
+  if (shot.frames.length >= MAX_KEYFRAMES) return shot;
+  const frame: Frame = { id: uid(), label: 'In between', poses: structuredClone(shot.frames[index].poses) };
+  return { ...shot, frames: [...shot.frames.slice(0, index + 1), frame, ...shot.frames.slice(index + 1)] };
+}
+export function removeKeyframe(shot: Shot, index: number): Shot {
+  return shot.frames.length <= MIN_KEYFRAMES ? shot : { ...shot, frames: shot.frames.filter((_, i) => i !== index) };
+}
 export function interpolatePose(shot: Shot, id: string, time: number): Pose {
   time = Number.isFinite(time) ? Math.max(0, Math.min(time, 1)) : 0;
-  const index = Math.min(Math.floor(time * 2), 1);
-  const t = Math.min(time * 2 - index, 1);
+  const spans = shot.frames.length - 1;
+  const index = Math.min(Math.floor(time * spans), spans - 1);
+  const t = Math.min(time * spans - index, 1);
   const smooth = t * t * (3 - 2 * t);
   const a = shot.frames[index].poses[id]; const b = shot.frames[index + 1].poses[id];
   return { x: a.x + (b.x - a.x) * smooth, z: a.z + (b.z - a.z) * smooth, rotation: a.rotation + (b.rotation - a.rotation) * smooth };
@@ -155,7 +170,7 @@ export function parseProject(raw: string): Project {
   if (!object(p) || p.version !== 1 || (p.id !== undefined && !validId(p.id)) || !shortText(p.name) || !Array.isArray(p.shots) || p.shots.length < 1 || p.shots.length > 12) throw new Error('Choose a Toybox project (.toybox.json) with 1–12 shots.');
   const ids = new Set<string>();
   const shots: Shot[] = p.shots.map((s: unknown) => {
-    if (!object(s) || !validId(s.id) || ids.has(s.id) || !shortText(s.name) || !shortText(s.note) || !shortText(s.prompt, 4000) || !worldId(s.world) || !cameraId(s.camera) || !integer(s.duration, 2, 12) || !integer(s.seed, 0, 2147483647) || !Array.isArray(s.props) || !s.props.length || s.props.length > 8 || !Array.isArray(s.frames) || s.frames.length !== 3) throw new Error('This project contains an invalid shot. Export it again from Toybox.');
+    if (!object(s) || !validId(s.id) || ids.has(s.id) || !shortText(s.name) || !shortText(s.note) || !shortText(s.prompt, 4000) || !worldId(s.world) || !cameraId(s.camera) || !integer(s.duration, 2, 12) || !integer(s.seed, 0, 2147483647) || !Array.isArray(s.props) || !s.props.length || s.props.length > 8 || !Array.isArray(s.frames) || s.frames.length < MIN_KEYFRAMES || s.frames.length > MAX_KEYFRAMES) throw new Error('This project contains an invalid shot. Export it again from Toybox.');
     ids.add(s.id);
     const propIds = new Set<string>();
     const props: StageProp[] = s.props.map((prop: unknown) => {

@@ -17,17 +17,18 @@ import { isActiveJob } from './lib/render';
 import type { StudioJob } from './lib/render';
 import { getActiveProjectId, loadProject, migrateLegacyProject, saveProject, setActiveProjectId } from './lib/project-store';
 import { responseJson } from './lib/api';
-import { filmExportMetadata, guideSource, prepareFrameExport, shotRenderMetadata, studioShortcut } from './lib/studio-controls';
+import { editSource, filmExportMetadata, guideSource, prepareFrameExport, shotRenderMetadata, studioShortcut } from './lib/studio-controls';
+import type { EditFrom } from './lib/studio-controls';
 import { cameraMoves } from './lib/camera-moves';
 import { keyframeLooks, restyleInstruction } from './lib/restyle';
-import { splitFrames, tileFrames } from './lib/triptych';
+import { splitFrames, stripGroups, tileFrames } from './lib/triptych';
 import type { CameraMove } from './lib/camera-moves';
 import { imageDataUrlToBlob } from './lib/image-export';
 import { makeStoryProject } from './lib/story-sparks';
 import type { StorySparkId } from './lib/story-sparks';
 import { makeDareShot } from './lib/director-dares';
 import type { DareId } from './lib/director-dares';
-import { changeShotWorld, cloneShot, removeShot, reorderShot, compilePrompt, downloadFile, makeProject, makeShot, parseProject, readImage, uid, worlds } from './lib/project';
+import { addKeyframe, changeShotWorld, cloneShot, removeKeyframe, removeShot, reorderShot, compilePrompt, downloadFile, frameTime, makeProject, makeShot, MAX_KEYFRAMES, MIN_KEYFRAMES, parseProject, readImage, uid, worlds } from './lib/project';
 import type { Health, Pose, Project, PropKind, MovieClip, Shot, StageProp, WorldId } from './lib/project';
 
 function boundedNumber(raw: string, min: number, max: number) { const value = Number(raw); return Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : 0; }
@@ -40,12 +41,13 @@ const propOptions: {kind: PropKind; name: string; role: string; color: string; i
 ];
 export default function App() {
   const [project, setProject] = useState<Project>(makeProject);
-  const [frameIndex, setFrameIndex] = useState(0);
+  const [frameChoice, setFrameIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<'stage' | 'look' | 'renders' | 'film' | 'sparks'>('stage');
   const [inspector, setInspector] = useState<'direction' | 'objects'>('direction');
   const [dialog, setDialog] = useState<'connection' | 'help' | 'templates' | 'export' | 'projects' | 'deleteScene' | null>(null);
   const [worldPreview, setWorldPreview] = useState(false);
+  const [editText, setEditText] = useState(''); const [editFrom, setEditFrom] = useState<EditFrom>('this');
   const [showGrid, setShowGrid] = useState(true); const [showPath, setShowPath] = useState(true);
   const [playing, setPlaying] = useState(false); const [previewTime, setPreviewTime] = useState<number | null>(null);
   const [toast, setToast] = useState(''); const [storageError, setStorageError] = useState(false);
@@ -69,6 +71,7 @@ export default function App() {
   const stageRef = useRef<StageHandle>(null); const workspaceRef = useRef<HTMLElement>(null);
   const importRef = useRef<HTMLInputElement>(null); const imageRef = useRef<HTMLInputElement>(null);
   const shot = project.shots.find(s => s.id === project.activeShotId) || project.shots[0];
+  const frameIndex = Math.min(frameChoice, shot.frames.length - 1);
   const world = worlds.find(w => w.id === shot.world)!;
   const selected = shot.props.find(p => p.id === selectedId);
   const activeJobs = jobs.filter(isActiveJob);
@@ -122,7 +125,7 @@ export default function App() {
   function redo() { const next = future.current.pop(); if (!next) return; history.current.push(project); lastCommit.current = 0; projectRef.current = next; setProject(next); setHistoryVersion(v => v + 1); }
   function switchMobilePanel(panel: 'stage' | 'director') { if(panel==='director' && wideWorkspace) setView('stage'); setMobilePanel(panel); window.scrollTo({top: 0, behavior: 'instant'}); }
   function showStorySparks() {setPlaying(false); setView('sparks'); setMobilePanel('stage'); window.scrollTo({top:0,behavior:'instant'});}
-  function selectFrame(index: number) { setFrameIndex(index); setPlaying(false); setPreviewTime(null); }
+  function selectFrame(index: number) { if(index >= shot.frames.length) return; setFrameIndex(index); setPlaying(false); setPreviewTime(null); }
   function play() { setView('stage'); if (!playing && previewTime === 1) setPreviewTime(0); setPlaying(value => !value); }
   function selectShot(id: string) { editProject(p => ({...p, activeShotId: id}), true); selectFrame(0); setSelectedId(null); setView('stage'); }
   function moveProp(id: string, pose: Pose) { editShot(s => ({...s, frames: s.frames.map((f, i) => i === frameIndex ? {...f, poses: {...f.poses, [id]: pose}} : f)})); }
@@ -216,11 +219,14 @@ export default function App() {
     const source=snapshot.frames[0].image || await captureStage(snapshot,!snapshot.reveal,0,0);
     // Later keyframes become the workflow's guide frames, camera move included.
     const keyframes: (string | null)[]=[];
-    for(const position of health.keyframeGuides || []) {
+    // Every later keyframe guides at its own time when the workflow has a guide slot for each.
+    const later=snapshot.frames.slice(1).map((_,index)=>frameTime(snapshot,index+1));
+    const positions=(health.keyframeSlots ?? 0)>=later.length ? later : null;
+    for(const position of positions || health.keyframeGuides || []) {
       const guide=guideSource(snapshot,position);
       keyframes.push(guide.kind==='photo' ? guide.image : guide.kind==='stage' ? await captureStage(snapshot,true,guide.frameIndex,guide.time) : null);
     }
-    const response=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:source,...(keyframes.length?{keyframes}:{}),prompt:compilePrompt(snapshot),negativePrompt:'blurry, distorted, text, watermark, low quality',seed:snapshot.seed,duration:snapshot.duration,metadata:shotRenderMetadata(snapshot,owner)})});
+    const response=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:source,...(keyframes.length?{keyframes}:{}),...(positions?{positions}:{}),prompt:compilePrompt(snapshot),negativePrompt:'blurry, distorted, text, watermark, low quality',seed:snapshot.seed,duration:snapshot.duration,metadata:shotRenderMetadata(snapshot,owner)})});
     const job=await responseJson<StudioJob>(response); renders.accept(job); return job;
   }
   async function renderShot(all = false) {
@@ -239,17 +245,18 @@ export default function App() {
     } catch(e) {notify(`${e instanceof Error?e.message:'Could not start rendering.'}${submitted?` ${submitted} shots were already queued.`:''}`); if(submitted) setView('renders');}
     finally {setSubmitting(false); setCaptureRequest(null); void renders.refresh();}
   }
+  const restyleImage=async (image: string, prompt: string, seed: number) => (await responseJson<{image:string}>(await fetch('/api/restyle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image,prompt,seed})}))).image;
+  // Store results like uploaded keyframe photos, re-encoded to keep projects small.
+  async function keepFramePhoto(ownerId: string, shotId: string, frameId: string, image: string) {
+    const blob=imageDataUrlToBlob(image), photo=await readImage(new File([blob],'keyframe.jpg',{type:blob.type}));
+    editProject(p=>p.id!==ownerId?p:({...p,shots:p.shots.map(s=>s.id!==shotId?s:{...s,frames:s.frames.map(f=>f.id===frameId?{...f,image:photo}:f)})}),true);
+  }
   async function restyleKeyframes() {
     if(!health.connected || !health.restyleAvailable) {setDialog('connection'); return;}
     const snapshot=structuredClone(shot), ownerId=project.id, looks=keyframeLooks(snapshot), last=snapshot.frames.length-1;
     const real=looks.flatMap((look,index)=>look==='real'?[index]:[]), toy=looks.flatMap((look,index)=>look==='toy'?[index]:[]);
-    const restyle=async (image: string, prompt: string) => (await responseJson<{image:string}>(await fetch('/api/restyle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image,prompt,seed:snapshot.seed})}))).image;
-    // Store results like uploaded keyframe photos, re-encoded to keep projects small.
-    const keep=async (index: number, image: string) => {
-      const photo=await readImage(new File([imageDataUrlToBlob(image)],'restyled.jpg',{type:imageDataUrlToBlob(image).type}));
-      const frameId=snapshot.frames[index].id;
-      editProject(p=>p.id!==ownerId?p:({...p,shots:p.shots.map(s=>s.id!==snapshot.id?s:{...s,frames:s.frames.map(f=>f.id===frameId?{...f,image:photo}:f)})}),true);
-    };
+    const restyle=(image: string, prompt: string) => restyleImage(image,prompt,snapshot.seed);
+    const keep=(index: number, image: string) => keepFramePhoto(ownerId,snapshot.id,snapshot.frames[index].id,image);
     setPlaying(false); setSubmitting(true); switchMobilePanel('stage');
     try {
       for(const index of toy) {
@@ -258,15 +265,41 @@ export default function App() {
       }
       if(real.length) {
         setBusyLabel(`Making ${real.length===1?'the last keyframe':`${real.length} keyframes`} real (about a minute)…`);
-        const captures: string[]=[];
-        for(const index of real) captures.push(await captureStage(snapshot,true,index,index/last));
-        const result=await restyle(real.length>1?await tileFrames(captures):captures[0],restyleInstruction(snapshot,'real',real.length));
-        const panels=real.length>1?await splitFrames(result,real.length):[result];
-        for(const [position,index] of real.entries()) await keep(index,panels[position]);
+        for(const group of stripGroups(real)) {
+          const captures: string[]=[];
+          for(const index of group) captures.push(await captureStage(snapshot,true,index,index/last));
+          const result=await restyle(group.length>1?await tileFrames(captures):captures[0],restyleInstruction(snapshot,'real',group.length));
+          const panels=group.length>1?await splitFrames(result,group.length):[result];
+          for(const [position,index] of group.entries()) await keep(index,panels[position]);
+        }
       }
       notify('Your keyframes are real now. Select one to compare; shuffle the seed and try again for a different take.');
     } catch(e) {notify(e instanceof Error?e.message:'Could not restyle the keyframes.');}
     finally {setSubmitting(false); setCaptureRequest(null);}
+  }
+  async function editKeyframe() {
+    const prompt=editText.trim();
+    if(prompt && (!health.connected || !health.restyleAvailable)) {setDialog('connection'); return;}
+    const owner=structuredClone(project), snapshot=owner.shots.find(s=>s.id===shot.id)!, index=frameIndex, source=editSource(owner.shots,snapshot.id,index,editFrom);
+    if(!source) {notify('The first scene has no keyframe before this one. Edit this keyframe instead.'); return;}
+    setPlaying(false); setSubmitting(true); switchMobilePanel('stage');
+    try {
+      const last=source.shot.frames.length-1;
+      const image=source.shot.frames[source.index].image || await captureStage(source.shot,worldPreview,source.index,source.index/last);
+      if(prompt) setBusyLabel(`Editing keyframe ${index+1} (about a minute)…`);
+      await keepFramePhoto(owner.id,snapshot.id,snapshot.frames[index].id,prompt?await restyleImage(image,prompt,snapshot.seed):image);
+      notify(prompt?'Keyframe edited. Shuffle the seed and edit again for a different take.':'Keyframe copied. Describe a change to edit it.');
+    } catch(e) {notify(e instanceof Error?e.message:'Could not edit this keyframe.');}
+    finally {setSubmitting(false); setCaptureRequest(null);}
+  }
+  function insertKeyframe() {
+    if(shot.frames.length>=MAX_KEYFRAMES) return;
+    editShot(s=>addKeyframe(s,frameIndex),true); setFrameIndex(frameIndex+1); setPlaying(false); setPreviewTime(null);
+    notify('In-between keyframe added. Move props or edit its photo, then render.');
+  }
+  function deleteKeyframe() {
+    if(shot.frames.length<=MIN_KEYFRAMES) return;
+    editShot(s=>removeKeyframe(s,frameIndex),true); setFrameIndex(Math.max(0,frameIndex-1));
   }
   function addToFilm(job: StudioJob, outputIndex: number) {
     const clips=project.edit?.clips || []; if(clips.length>=24) {notify('A film edit holds up to 24 takes.'); return;}
@@ -333,8 +366,8 @@ export default function App() {
         {view === 'film' && <MovieEditor project={project} jobs={jobs} onChange={clips => editProject(p => ({...p,edit:{clips}}),true)} onExport={exportFilm} onRenders={() => setView('renders')} />}
 
       </section>
-      {(view === 'stage' || view === 'look') && <><div className="playback-bar"><button className="play-button" onClick={play} aria-label={playing ? 'Pause stage preview' : 'Play stage preview'}>{playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}</button><span className="timecode">00:{String(Math.floor((previewTime || 0) * shot.duration)).padStart(2, '0')}<span> / 00:{String(shot.duration).padStart(2, '0')}</span></span><input aria-label="Stage preview position" type="range" min={0} max={1} step={.001} value={previewTime ?? frameIndex / 2} onChange={e => {setPlaying(false); setPreviewTime(Number(e.target.value)); setView('stage');}} /><span className="preview-label">Stage preview</span><button className="icon-button small" aria-label="Export current stage frame" onClick={() => void exportFrame()}><ArrowDownToLine size={16} /></button></div>
-      <section className="storyboard"><div className="storyboard-heading"><div><h2>Three moments. One story.</h2><span>Set the scene, then move things along.</span></div><div className="storyboard-actions"><button className="text-button" title="Restyle each keyframe into a real photograph with your local image model" onClick={() => void restyleKeyframes()}><WandSparkles size={14} /> Make keyframes real</button><button className="text-button" onClick={() => imageRef.current?.click()}><Upload size={14} /> Add your photo</button></div></div><div className="frame-strip">{shot.frames.map((frame, index) => <button key={frame.id} className={`frame-card ${index === frameIndex && previewTime === null ? 'active' : ''}`} onClick={() => {selectFrame(index); setView('stage');}}><div className="frame-image"><FrameMap shot={shot} frame={frame} /><span className="frame-number">{String(index + 1).padStart(2, '0')}</span>{index === frameIndex && previewTime === null && <span className="frame-selected"><Check size={12} /></span>}</div><div className="frame-caption"><strong>{frame.label}</strong><span>{index === 0 ? '0.0' : (shot.duration * index / 2).toFixed(1)}s</span></div></button>)}</div></section></>}
+      {(view === 'stage' || view === 'look') && <><div className="playback-bar"><button className="play-button" onClick={play} aria-label={playing ? 'Pause stage preview' : 'Play stage preview'}>{playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}</button><span className="timecode">00:{String(Math.floor((previewTime || 0) * shot.duration)).padStart(2, '0')}<span> / 00:{String(shot.duration).padStart(2, '0')}</span></span><input aria-label="Stage preview position" type="range" min={0} max={1} step={.001} value={previewTime ?? frameTime(shot, frameIndex)} onChange={e => {setPlaying(false); setPreviewTime(Number(e.target.value)); setView('stage');}} /><span className="preview-label">Stage preview</span><button className="icon-button small" aria-label="Export current stage frame" onClick={() => void exportFrame()}><ArrowDownToLine size={16} /></button></div>
+      <section className="storyboard"><div className="storyboard-heading"><div><h2>{shot.frames.length === 3 ? 'Three' : shot.frames.length} moments. One story.</h2><span>Set the scene, then move things along.</span></div><div className="storyboard-actions"><button className="text-button" title="Restyle each keyframe into a real photograph with your local image model" onClick={() => void restyleKeyframes()}><WandSparkles size={14} /> Make keyframes real</button><button className="text-button" onClick={() => imageRef.current?.click()}><Upload size={14} /> Add your photo</button>{shot.frames.length > MIN_KEYFRAMES && <button className="text-button" aria-label={`Remove keyframe ${frameIndex + 1}`} onClick={deleteKeyframe}><Trash2 size={14} /> Remove</button>}</div></div><div className="frame-strip">{shot.frames.map((frame, index) => <button key={frame.id} className={`frame-card ${index === frameIndex && previewTime === null ? 'active' : ''}`} onClick={() => {selectFrame(index); setView('stage');}}><div className="frame-image"><FrameMap shot={shot} frame={frame} /><span className="frame-number">{String(index + 1).padStart(2, '0')}</span>{index === frameIndex && previewTime === null && <span className="frame-selected"><Check size={12} /></span>}</div><div className="frame-caption"><strong>{frame.label}</strong><span>{(shot.duration * frameTime(shot, index)).toFixed(1)}s</span></div></button>)}{shot.frames.length < MAX_KEYFRAMES && <button className="add-keyframe" aria-label={`Add a keyframe after keyframe ${frameIndex + 1}`} title="Add an in-between keyframe" onClick={insertKeyframe}><Plus size={17} /></button>}</div><form className="keyframe-edit" onSubmit={e => {e.preventDefault(); void editKeyframe();}}><WandSparkles size={14} aria-hidden /><input aria-label={`Describe a change to keyframe ${frameIndex + 1}`} maxLength={4000} value={editText} onChange={e => setEditText(e.target.value)} placeholder="Describe a change, like “the toy becomes a real car”" /><select aria-label="Edit from" value={editFrom} onChange={e => setEditFrom(e.target.value as EditFrom)}><option value="this">From this keyframe</option><option value="previous">{frameIndex === 0 ? 'From the last scene' : 'From the previous keyframe'}</option></select><button className="button" type="submit" disabled={!editText.trim() && editFrom === 'this'}>{!editText.trim() && editFrom === 'previous' ? 'Copy' : 'Edit'}</button></form></section></>}
       {view !== 'sparks' && <footer className="workspace-footer"><span><Box size={12} /> Built for the way you imagine.</span><span>Move props between frames <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span></footer>}
     </main>
     <aside className={`inspector ${mobilePanel !== 'director' ? 'mobile-hidden' : ''}`}>
@@ -361,6 +394,6 @@ export default function App() {
     {dialog === 'connection' && <Connection health={health} refresh={refreshHealth} onClose={() => setDialog(null)} />}
     {dialog === 'templates' && <Dialog title="Where will your little world go?" onClose={() => setDialog(null)} wide><p className="dialog-intro">Start with a feeling. Make the rest your own.</p><div className="template-grid">{worlds.map(w => <button className="template-card" key={w.id} onClick={() => newShot(w.id)}><img src={w.image} alt={`Example concept for ${w.name}`} /><div><h3>{w.name}</h3><ArrowUpRight size={19} /></div><p>{w.subtitle}</p></button>)}</div><p className="small-text">Illustrative concept artwork. Your generated shots depend on your model and workflow.</p></Dialog>}
     {dialog === 'export' && <Dialog title="Give someone else the director’s chair." onClose={() => setDialog(null)}><p className="dialog-intro">Share the scene behind the shot. Every prop, keyframe, and creative decision travels with it.</p><label className="field"><span>Project name</span><input value={project.name} maxLength={100} onChange={e => editProject(p => ({...p, name: e.target.value}))} /></label><div className="export-details"><span><Check size={15} /> {project.shots.length} editable {project.shots.length === 1 ? 'scene' : 'scenes'}</span><span><Check size={15} /> Props, positions & directions</span><span><Check size={15} /> Uploaded frame images</span></div><button className="button primary full-width" onClick={exportProject}><Download size={16} /> Export Toybox project</button><button className="button subtle full-width" onClick={() => {downloadFile(compilePrompt(shot), 'shot-direction.txt', 'text/plain'); notify('Shot direction exported.');}}><FileText size={16} /> Export this shot’s direction</button><p className="small-text export-footnote">Projects are portable JSON files. Rendered videos are downloaded separately from Output. Film edits reference the renders on this machine. API keys are never included.</p></Dialog>}
-    {dialog === 'help' && <Dialog title="A little stage for big ideas." onClose={() => setDialog(null)} wide><div className="help-intro"><span className="brand-mark"><Box size={28} /></span><p>Toybox is an open-source filmmaking studio. Arrange the small things. Imagine the big things.</p></div><ol className="help-steps"><li><strong>Build your little world.</strong><p>Drag props around the stage, or upload a photo of a real tabletop set. Select a prop to say what it becomes in your movie.</p></li><li><strong>Give it a beginning, middle, and end.</strong><p>Use the wand on the stage to preview your props as a cinematic world. Move props in each keyframe. Press Space to preview the staging. Pick a camera move under Behind the camera. All three keyframes, seen through that move, guide the generated video.</p></li><li><strong>Make it cinematic.</strong><p>Choose a world and describe the action. Connect local ComfyUI and an API-format workflow to render a real shot. The look references are sample artwork.</p></li><li><strong>Pass the imagination along.</strong><p>Export your Toybox project so someone else can remix the same scene. Your photos stay in your browser until you send them to your configured render engine.</p></li></ol><div className="help-footer"><span>App: MIT license · Models: their respective licenses</span><span><kbd>Space</kbd> Play <kbd>⌘/Ctrl Z</kbd> Undo</span></div></Dialog>}
+    {dialog === 'help' && <Dialog title="A little stage for big ideas." onClose={() => setDialog(null)} wide><div className="help-intro"><span className="brand-mark"><Box size={28} /></span><p>Toybox is an open-source filmmaking studio. Arrange the small things. Imagine the big things.</p></div><ol className="help-steps"><li><strong>Build your little world.</strong><p>Drag props around the stage, or upload a photo of a real tabletop set. Select a prop to say what it becomes in your movie.</p></li><li><strong>Give it a beginning, middle, and end.</strong><p>Use the wand on the stage to preview your props as a cinematic world. Move props in each keyframe. Press Space to preview the staging. Pick a camera move under Behind the camera. Add in-between keyframes with +. Every keyframe, seen through that move, guides the generated video.</p></li><li><strong>Make it cinematic.</strong><p>Choose a world and describe the action. Connect local ComfyUI and an API-format workflow to render a real shot. The look references are sample artwork.</p></li><li><strong>Pass the imagination along.</strong><p>Export your Toybox project so someone else can remix the same scene. Your photos stay in your browser until you send them to your configured render engine.</p></li></ol><div className="help-footer"><span>App: MIT license · Models: their respective licenses</span><span><kbd>Space</kbd> Play <kbd>⌘/Ctrl Z</kbd> Undo</span></div></Dialog>}
   </div>{(submitting || switchingProject || !projectReady) && <div className="preparing-overlay" role="status"><div><LoaderCircle size={25} className="spin" /><p>{!projectReady ? 'Opening your workspace…' : switchingProject ? 'Saving your project…' : busyLabel}</p>{submitting && busyLabel.startsWith('Preparing scene') && <button className="button" onClick={() => {batchCancel.current=true;}}>Stop adding shots</button>}</div></div>}</>;
 }

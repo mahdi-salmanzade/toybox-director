@@ -109,7 +109,7 @@ export async function createApp(options = {}) {
     }
     next();
   });
-  // Three 8 MB keyframes, base64-encoded, plus the shot direction.
+  // Up to eight keyframes (re-encoded photos or stage captures), base64-encoded, plus the shot direction.
   app.use('/api', express.json({ limit: '36mb', strict: true }));
   const getClient = () => {
     if (!config.configured) throw new RequestError('Connect Comfy first: set COMFY_BASE_URL for your local API proxy or COMFY_API_KEY for Comfy Cloud in .env, then restart the server.', 503);
@@ -118,8 +118,8 @@ export async function createApp(options = {}) {
   };
 
   app.get('/api/health', async (_req, res) => {
-    if (!config.configured) return res.json({ connected: false, provider: 'unconfigured', workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable, message: 'Connect a local Comfy API proxy or add a Comfy Cloud API key in .env. See docs/COMFY.md.' });
-    if (healthCache && Date.now() - healthCache.time < 5000) return res.json({ ...healthCache.value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
+    if (!config.configured) return res.json({ connected: false, provider: 'unconfigured', workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), keyframeSlots: guideSlots(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable, message: 'Connect a local Comfy API proxy or add a Comfy Cloud API key in .env. See docs/COMFY.md.' });
+    if (healthCache && Date.now() - healthCache.time < 5000) return res.json({ ...healthCache.value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), keyframeSlots: guideSlots(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
     let value;
     try {
       getClient();
@@ -136,7 +136,7 @@ export async function createApp(options = {}) {
       value = { connected: false, provider: config.provider, message: `Cannot connect to Comfy. ${safeError(error, config)}` };
     }
     healthCache = { time: Date.now(), value };
-    return res.json({ ...value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
+    return res.json({ ...value, workflowConfigured: Boolean(saved), keyframeGuides: guidePositions(), keyframeSlots: guideSlots(), restyleAvailable: Boolean(restyleWorkflow), movieExportAvailable });
   });
 
   app.get('/api/workflow', (_req, res) => res.json(saved ? { configured: true, ...saved, nodes: workflowNodes(saved.workflow), duration: durationInfo(saved.workflow, saved.bindings) } : { configured: false, workflow: null, bindings: null, nodes: [] }));
@@ -163,8 +163,10 @@ export async function createApp(options = {}) {
     if (!job || job.deleting) throw new RequestError('This item is no longer in the render library.', 404);
     return job;
   };
-  const normalizedRequest = (body, input) => ({ image: body.image, ...(input.keyframes.length ? { keyframes: input.keyframes.map((item) => item?.source ?? null) } : {}), workflow: input.workflow, bindings: input.bindings, prompt: input.prompt, negativePrompt: input.negativePrompt, seed: input.seed, duration: input.duration });
-  const guidePositions = () => saved?.bindings.keyframes?.map((item) => item.position) ?? [];
+  const normalizedRequest = (body, input) => ({ image: body.image, ...(input.keyframes.length ? { keyframes: input.keyframes.slice(0, input.positions?.length).map((item) => item?.source ?? null) } : {}), ...(input.positions ? { positions: input.positions } : {}), workflow: input.workflow, bindings: input.bindings, prompt: input.prompt, negativePrompt: input.negativePrompt, seed: input.seed, duration: input.duration });
+  const guidePositions = () => saved?.bindings.keyframes?.flatMap((item) => item.position === undefined ? [] : [item.position]) ?? [];
+  // Guides the studio can place at any keyframe's time.
+  const guideSlots = () => saved?.bindings.keyframes?.filter((item) => item.frame).length ?? 0;
 
   async function ensureHandle(job) {
     if (job.handle) return job.handle;

@@ -2,7 +2,7 @@
 
 **A little stage for big ideas.**
 
-Toybox is an open-source, local-first take on a cinematic AI video studio: instead of describing a shot in a prompt box, you **block it**. Arrange toy props on a 3D stage, pick a camera move, set three keyframes, and render. Your staging and camera move are captured from the 3D world and guide an open-weight LTX video model in your own ComfyUI. Keep every take, then trim your favorites into a film.
+Toybox is an open-source, local-first take on a cinematic AI video studio: instead of describing a shot in a prompt box, you **block it**. Arrange toy props on a 3D stage, pick a camera move, set three to eight keyframes, and render. Your staging and camera move are captured from the 3D world and guide an open-weight LTX video model in your own ComfyUI. Keep every take, then trim your favorites into a film.
 
 Built with React, Three.js, Express, and the official [Comfy SDK](https://www.npmjs.com/package/@comfyorg/sdk) for Comfy's *Open Source Higgsfield* challenge. Open-weight models only; no partner nodes or paid APIs are required.
 
@@ -52,9 +52,10 @@ The API is bound to localhost. This is a single-user local app, not a multi-tena
 - Move, rotate, recolor, resize, and cast a car, mugs, blocks, marbles, and trees in a real 3D stage.
 - Start from three authored **Story sparks**: a commuting city, a doorway looking for a home, or a lunar parade for a tree. Each opens an editable three-scene film and preserves your earlier project.
 - Try **Director’s dares** that move the scenery, reverse the scale hierarchy, or close a stage loop. Each creates a separate take with the original intact.
-- Set beginning, middle, and ending positions and pick a camera move; play and scrub the staging animation. All three keyframes guide the generated video.
+- Set beginning, middle, and ending positions and pick a camera move; play and scrub the staging animation. Add in-between keyframes, up to eight per shot, evenly spaced in time. Every keyframe guides the generated video.
 - Transform the same layout into a live canyon, lunar outpost, or night city, or upload a real photo for a keyframe.
 - **Make keyframes real**: restyle the staged keyframes into photographs with open-weight Qwen-Image-Edit-2511 in your ComfyUI. All real keyframes are edited together as one side-by-side strip, so they share one place, light, and cast while each keeps its own staging. Results become keyframe photos you can compare, keep, or swap back to the stage.
+- **Edit a keyframe in words**: describe a change ("the train enters a dark tunnel", "the toy becomes a real car") and Qwen-Image-Edit applies it to that keyframe, or builds it from the keyframe before it. Chained edits keep the subject identical from keyframe to keyframe, which lets LTX morph smoothly between very different scenes. The first keyframe of a scene can continue from the previous scene's last keyframe.
 - **Toy → real reveal**: keyframe 1 becomes a real photograph of the toys on a tabletop and holds through the middle; by the last keyframe they are the real thing. Stage it once and render the toy-car-to-real-car transformation.
 - Save multiple projects in IndexedDB, switch between them, undo/redo edits, and export/import editable `.toybox.json` backups.
 - Generate real video through the bundled open-weight LTX 2B workflow, or import and map another Comfy API workflow.
@@ -63,11 +64,11 @@ The API is bound to localhost. This is a single-user local app, not a multi-tena
 - Add completed videos to a film, reorder and trim up to 24 clips, and export a silent 24 fps H.264 MP4 up to five minutes long. Two film exports can run concurrently.
 - Export shot direction and source frames for use elsewhere.
 
-Keyboard: **Space** plays the stage; **1 / 2 / 3** selects a keyframe; **Cmd/Ctrl+Z** undoes; **Cmd/Ctrl+Shift+Z** redoes; **Cmd/Ctrl+S** exports the project. Numeric prop controls provide an alternative to dragging.
+Keyboard: **Space** plays the stage; **1–8** selects a keyframe; **Cmd/Ctrl+Z** undoes; **Cmd/Ctrl+Shift+Z** redoes; **Cmd/Ctrl+S** exports the project. Numeric prop controls provide an alternative to dragging.
 
 ## What generation does today
 
-**Your staging drives the video.** The bundled workflow captures all three keyframes from the 3D world, including the shot's camera move, and gives them to LTX as guide frames at the start, middle, and end of the clip (core `LTXVAddGuide` nodes). The prompt adds the world, cast, camera move, and a plain-language description of how each prop travels.
+**Your staging drives the video.** The bundled workflow captures every keyframe from the 3D world, including the shot's camera move, and gives them to LTX as guide frames at their time in the clip (core `LTXVAddGuide` nodes). The prompt adds the world, cast, camera move, and a plain-language description of how each prop travels. When every keyframe is a photo, the photos already define the place and cast, so the prompt is your direction and the camera move alone.
 
 *Above: the three staged keyframes with a push-in. Middle: the guided LTX render at 0, 3, and 6 seconds. Bottom: the same seed and prompt with only the first frame; the model invents its own path and scenery.*
 
@@ -109,7 +110,7 @@ npm test
 npm run build
 ```
 
-The current verification pass has **100 passing tests**, covering keyframe restyling and reveals, keyframe guidance and camera moves, authored story continuity, creative scene transformations, project persistence and migration, malformed imports, film edit validation, workflow bindings, SDK submission and recovery, cancellation, retries, real video assembly, and production file boundaries. Browser checks include desktop and mobile creation, local generation, playback, and MP4 downloads. See [VERIFICATION.md](docs/VERIFICATION.md) for the evidence, [CREATIVE-DIRECTION.md](docs/CREATIVE-DIRECTION.md) for the authoring standard, and the runtime guide for model details. Generation quality and timing depend on hardware, models, and settings.
+The current verification pass has **106 passing tests**, covering keyframe editing, in-between keyframes, restyling and reveals, keyframe guidance and camera moves, authored story continuity, creative scene transformations, project persistence and migration, malformed imports, film edit validation, workflow bindings, SDK submission and recovery, cancellation, retries, real video assembly, and production file boundaries. Browser checks include desktop and mobile creation, local generation, playback, and MP4 downloads. See [VERIFICATION.md](docs/VERIFICATION.md) for the evidence, [CREATIVE-DIRECTION.md](docs/CREATIVE-DIRECTION.md) for the authoring standard, and the runtime guide for model details. Generation quality and timing depend on hardware, models, and settings.
 
 ## License and credits
 

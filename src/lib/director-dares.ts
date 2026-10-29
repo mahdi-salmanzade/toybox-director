@@ -19,6 +19,9 @@ export function makeDareShot(source: Shot, id: DareId): Shot {
   const lead = shot.props[0];
   const leadName = lead.name || 'the lead prop';
   shot.frames.forEach(frame => { delete frame.image; });
+  // Each dare stages a beginning, middle, and end.
+  const last = shot.frames.length - 1;
+  shot.frames = [shot.frames[0], shot.frames[Math.round(last / 2)], shot.frames[last]];
   shot.name = `${source.name || 'Untitled scene'} — ${dare.title}`.slice(0, 90);
   shot.note = `${dare.title}. ${dare.change}`.slice(0, 180);
   let direction: string;

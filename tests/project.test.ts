@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { changeShotWorld, cloneShot, compilePrompt, describeMotion, interpolatePose, makeProject, makeShot, parseProject, readImage, removeShot, reorderShot } from '../src/lib/project.ts';
+import { addKeyframe, changeShotWorld, cloneShot, compilePrompt, describeMotion, frameTime, interpolatePose, makeProject, makeShot, parseProject, readImage, removeKeyframe, removeShot, reorderShot } from '../src/lib/project.ts';
 
 test('portable projects preserve every staging decision on round trip', () => {
   const project = makeProject();
@@ -221,4 +221,29 @@ test('image decoding failure is actionable and image bitmaps close when canvas p
     if (originalDecode) Object.defineProperty(globalThis, 'createImageBitmap', originalDecode); else Reflect.deleteProperty(globalThis, 'createImageBitmap');
     if (originalDocument) Object.defineProperty(globalThis, 'document', originalDocument); else Reflect.deleteProperty(globalThis, 'document');
   }
+});
+
+test('a shot holds three to eight evenly spaced keyframes, and the stage moves through every one', () => {
+  let shot = makeShot();
+  const lead = shot.props[0].id;
+  shot = addKeyframe(shot, 0);
+  assert.equal(shot.frames.length, 4);
+  assert.equal(shot.frames[1].label, 'In between');
+  assert.deepEqual(shot.frames[1].poses, shot.frames[0].poses, 'a new keyframe starts from the one before it');
+  assert.notEqual(shot.frames[1].poses, shot.frames[0].poses);
+  shot.frames[1].poses[lead] = {x: 1, z: 1, rotation: 0};
+  assert.equal(frameTime(shot, 1), 1 / 3);
+  assert.deepEqual(interpolatePose(shot, lead, 1 / 3), {x: 1, z: 1, rotation: 0});
+  const end = interpolatePose(shot, lead, 1), last = shot.frames[3].poses[lead];
+  assert.ok(Math.abs(end.x - last.x) + Math.abs(end.z - last.z) < 1e-9, 'the shot ends on its last keyframe');
+  for (let index = 0; index < 6; index++) shot = addKeyframe(shot, shot.frames.length - 1);
+  assert.equal(shot.frames.length, 8, 'no more than eight keyframes');
+  const project = makeProject(); project.shots[0] = shot; project.activeShotId = shot.id;
+  assert.equal(parseProject(JSON.stringify(project)).shots[0].frames.length, 8);
+  project.shots[0] = {...shot, frames: [...shot.frames, {...shot.frames[0], id: 'ninth'}]};
+  assert.throws(() => parseProject(JSON.stringify(project)), /invalid shot/);
+  let small = makeShot();
+  small = removeKeyframe(small, 1);
+  assert.equal(small.frames.length, 3, 'a shot keeps at least three keyframes');
+  assert.equal(removeKeyframe(addKeyframe(small, 1), 2).frames.map(frame => frame.id).join(), small.frames.map(frame => frame.id).join());
 });

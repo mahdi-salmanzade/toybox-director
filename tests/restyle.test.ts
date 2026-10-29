@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { compilePrompt, makeShot, parseProject, makeProject } from '../src/lib/project.ts';
 import { keyframeLooks, restyleInstruction } from '../src/lib/restyle.ts';
-import { guideSource } from '../src/lib/studio-controls.ts';
+import { editSource, guideSource } from '../src/lib/studio-controls.ts';
 
 test('every keyframe becomes real, and a reveal keeps a toy opening with a free middle', () => {
   const shot = makeShot();
@@ -58,4 +58,28 @@ test('real keyframes restyle together as one strip that splits back into exact p
   assert.deepEqual(panelBounds(2240, 3), [{x: 0, width: 747}, {x: 747, width: 746}, {x: 1493, width: 747}]);
   assert.equal(panelBounds(2240, 3).reduce((sum, panel) => sum + panel.width, 0), 2240);
   assert.deepEqual(panelBounds(1280, 1), [{x: 0, width: 1280}]);
+});
+
+test('a keyframe edit starts from this keyframe, the one before it, or the previous scene', () => {
+  const first = makeShot(), second = makeShot(), shots = [first, second];
+  assert.deepEqual(editSource(shots, second.id, 1, 'this'), {shot: second, index: 1});
+  assert.deepEqual(editSource(shots, second.id, 1, 'previous'), {shot: second, index: 0});
+  assert.deepEqual(editSource(shots, second.id, 0, 'previous'), {shot: first, index: 2}, 'a scene continues from the last one');
+  assert.equal(editSource(shots, first.id, 0, 'previous'), null);
+  assert.equal(editSource(shots, 'missing', 0, 'this'), null);
+});
+
+test('photo keyframes are directed by the prompt and camera alone', () => {
+  const shot = makeShot(); shot.prompt = 'The toy becomes a real car in a tunnel.'; shot.cameraMove = 'push-in';
+  shot.frames.forEach((frame, index) => { frame.image = `data:image/jpeg;base64,${'ABC'[index]}AAA`; });
+  assert.equal(compilePrompt(shot), 'The toy becomes a real car in a tunnel.\nCamera: The camera slowly pushes in toward the action.');
+  shot.frames[1].image = undefined;
+  assert.match(compilePrompt(shot), /World: /, 'a staged keyframe still needs the world and cast');
+});
+
+test('many keyframes restyle in even strips of up to four', async () => {
+  const { stripGroups } = await import('../src/lib/triptych.ts');
+  assert.deepEqual(stripGroups([0, 1, 2]), [[0, 1, 2]]);
+  assert.deepEqual(stripGroups([0, 1, 2, 3, 4]), [[0, 1, 2], [3, 4]]);
+  assert.deepEqual(stripGroups([1, 2, 3, 4, 5, 6, 7]), [[1, 2, 3, 4], [5, 6, 7]]);
 });

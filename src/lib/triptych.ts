@@ -37,3 +37,9 @@ export async function splitFrames(strip: string, count: number): Promise<string[
     });
   } finally { image.close(); }
 }
+
+/** Split keyframes into even strips of at most `max`, so each panel keeps enough pixels to edit. */
+export function stripGroups<T>(items: T[], max = 4): T[][] {
+  const groups = Math.ceil(items.length / max), size = Math.ceil(items.length / groups);
+  return Array.from({length: groups}, (_, index) => items.slice(index * size, (index + 1) * size));
+}

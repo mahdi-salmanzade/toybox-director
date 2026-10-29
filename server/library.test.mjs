@@ -450,6 +450,30 @@ test('the bundled keyframe workflow receives every guide frame, scales guide pos
   assert.equal(remote.submitted[2].workflow['15'].inputs.frame_idx, 36, 'retries keep their saved guide frames');
 });
 
+test('extra keyframes fill the bundled spare guide slots at the times the studio sends, including on retry', async (t) => {
+  const graph = JSON.parse(await readFile(new URL('../workflows/ltx-keyframes.api.json', import.meta.url), 'utf8'));
+  const mappings = JSON.parse(await readFile(new URL('../workflows/ltx-keyframes.bindings.json', import.meta.url), 'utf8'));
+  const remote = upstream(), { start } = await fixture(t, { createClient: remote.createClient });
+  const api = await start({ fetchImpl: async () => Response.json({ jobs: [] }) });
+  assert.equal((await api.call('/api/workflow', { workflow: graph, bindings: mappings })).status, 200);
+  const health = (await api.call('/api/health')).body;
+  assert.deepEqual([health.keyframeGuides, health.keyframeSlots], [[0.5, 1], 7]);
+  const frame = () => `data:image/png;base64,${PNG}`;
+  const five = { image: frame(), keyframes: [frame(), frame(), frame(), frame()], positions: [.25, .5, .75, 1], prompt: 'A toy car becomes real.', seed: 7, duration: 3 };
+  const first = await api.call('/api/render', five);
+  assert.equal(first.status, 202, JSON.stringify(first.body));
+  const sent = remote.submitted[0].workflow;
+  assert.deepEqual(['15', '17', '20', '22'].map((node) => sent[node].inputs.frame_idx), [18, 36, 54, 72]);
+  assert.equal(sent['21'].inputs.image.info.file_path, 'toybox-keyframe-5.png');
+  for (const node of ['23', '24', '25', '26', '27', '28']) assert.equal(sent[node], undefined, `unused slot node ${node} is removed`);
+  assert.deepEqual(sent['7'].inputs.positive, ['22', 0], 'conditioning follows the last used guide');
+  assert.deepEqual(sent['10'].inputs.latent_image, ['22', 2]);
+  assert.equal((await api.call('/api/render', { ...five, positions: [.25, .5] })).status, 400);
+  assert.equal((await api.call(`/api/jobs/${first.body.id}/cancel`, {})).status, 202);
+  assert.equal((await api.call(`/api/jobs/${first.body.id}/retry`, {})).status, 202);
+  assert.equal(remote.submitted[1].workflow['15'].inputs.frame_idx, 18, 'retries keep each keyframe time');
+});
+
 test('restyle submits the bundled image-edit graph with or without a look reference and returns the image', async (t) => {
   const remote = upstream(), { start } = await fixture(t, { createClient: remote.createClient });
   const api = await start({ fetchImpl: async () => Response.json({ jobs: [] }) });

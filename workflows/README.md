@@ -9,11 +9,11 @@ Required model files:
 | `ltxv-2b-0.9.8-distilled.safetensors` | `models/checkpoints/` |
 | `t5xxl_fp16.safetensors` | `models/text_encoders/` |
 
-The graph encodes the opening keyframe with `LTXVImgToVideo`, adds the middle and final keyframes as `LTXVAddGuide` guide frames, samples LTX with the distilled eight-step schedule, crops the guide latents with `LTXVCropGuides`, and saves H.264 MP4. Defaults: 512×320, 24 FPS. The T5 text encoder runs on CPU.
+The graph encodes the opening keyframe with `LTXVImgToVideo`, adds later keyframes as chained `LTXVAddGuide` guide frames (the middle and final keyframes plus five spare slots, for up to eight keyframes), samples LTX with the distilled eight-step schedule, crops the guide latents with `LTXVCropGuides`, and saves H.264 MP4. Defaults: 512×320, 24 FPS. The T5 text encoder runs on CPU.
 
 ### Keyframe bindings
 
-`keyframes` maps guide images after the opening frame. Each entry names its `LoadImage` widget, a `position` in the clip (after 0, up to 1), an optional `frame` widget that Toybox sets to `round(position × (frames − 1))`, and an optional `bypass`. When a render has no image for a guide, the bypass removes the guide node and connects each consumer of output *N* to the input named by `bypass.outputs[N]`; the unused `LoadImage` node is removed too. Guides without a bypass require an image.
+`keyframes` maps guide images after the opening frame. Each entry names its `LoadImage` widget, a `position` in the clip (after 0, up to 1), an optional `frame` widget that Toybox sets to `round(position × (frames − 1))`, and an optional `bypass`. When a render has no image for a guide, the bypass removes the guide node and connects each consumer of output *N* to the input named by `bypass.outputs[N]`; the unused `LoadImage` node is removed too. Guides without a bypass require an image. An entry with a `frame` widget and a bypass may omit `position`: it is a spare slot, used only when the studio sends that keyframe's position.
 
 ```json
 {"nodeId": "16", "input": "image", "position": 1,
@@ -21,7 +21,7 @@ The graph encodes the opening keyframe with `LTXVImgToVideo`, adds the middle an
  "bypass": {"nodeId": "17", "outputs": ["positive", "negative", "latent"]}}
 ```
 
-`/api/health` reports the configured guide positions as `keyframeGuides`, and the studio captures each one from the 3D stage at that moment of the shot.
+`/api/health` reports the configured guide positions as `keyframeGuides` and the number of guides with a `frame` widget as `keyframeSlots`. When a shot's later keyframes fit in `keyframeSlots`, the studio sends a `positions` list (one time per keyframe, evenly spaced) and each guide lands at its keyframe's time; otherwise it captures the fixed `keyframeGuides` positions from the 3D stage.
 
 The duration binding converts studio seconds to the nearest `8n+1` frames at 24 FPS. Thus 2 seconds produces 49 frames (~2.04 seconds) and 6 seconds produces 145 frames (~6.04 seconds). The submitted response reports the resulting duration. Longer clips need more memory and execution time.
 

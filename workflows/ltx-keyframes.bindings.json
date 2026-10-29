@@ -37,6 +37,86 @@
           "latent"
         ]
       }
+    },
+    {
+      "nodeId": "19",
+      "input": "image",
+      "frame": {
+        "nodeId": "20",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "20",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "21",
+      "input": "image",
+      "frame": {
+        "nodeId": "22",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "22",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "23",
+      "input": "image",
+      "frame": {
+        "nodeId": "24",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "24",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "25",
+      "input": "image",
+      "frame": {
+        "nodeId": "26",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "26",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
+    },
+    {
+      "nodeId": "27",
+      "input": "image",
+      "frame": {
+        "nodeId": "28",
+        "input": "frame_idx"
+      },
+      "bypass": {
+        "nodeId": "28",
+        "outputs": [
+          "positive",
+          "negative",
+          "latent"
+        ]
+      }
     }
   ],
   "prompt": {

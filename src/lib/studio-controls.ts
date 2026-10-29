@@ -21,6 +21,17 @@ export function filmExportMetadata(project: Project) {
   };
 }
 
+export type EditFrom = 'this' | 'previous';
+/** The keyframe an edit starts from: this one, the one before it, or the previous scene's last keyframe. */
+export function editSource(shots: Shot[], shotId: string, frameIndex: number, from: EditFrom): {shot: Shot; index: number} | null {
+  const at = shots.findIndex(item => item.id === shotId), shot = shots[at];
+  if (!shot || !shot.frames[frameIndex]) return null;
+  if (from === 'this') return {shot, index: frameIndex};
+  if (frameIndex > 0) return {shot, index: frameIndex - 1};
+  const previous = shots[at - 1];
+  return previous ? {shot: previous, index: previous.frames.length - 1} : null;
+}
+
 export type GuideSource = {kind: 'photo'; image: string} | {kind: 'stage'; frameIndex: number; time: number} | {kind: 'skip'};
 /** Choose the image for a workflow guide at a position (0–1] of the shot. */
 export function guideSource(shot: Shot, position: number): GuideSource {
@@ -65,6 +76,6 @@ export function studioShortcut(event: KeyInput, context: ShortcutContext): Studi
   if (command && !event.altKey && key === 'z' && !context.textEntry) return { kind: event.shiftKey ? 'redo' : 'undo' };
   if (command || event.altKey || context.interactive || !context.stageVisible) return null;
   if (event.code === 'Space') return { kind: 'play' };
-  if (['1', '2', '3'].includes(key)) return { kind: 'frame', index: Number(key) - 1 };
+  if (/^[1-8]$/.test(key)) return { kind: 'frame', index: Number(key) - 1 };
   return null;
 }

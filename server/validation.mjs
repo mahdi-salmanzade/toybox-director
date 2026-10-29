@@ -101,16 +101,22 @@ const widget = (binding, workflow, type, label) => {
 /**
  * Later keyframes guide the video at a position in the clip (0–1]. A guide
  * with a bypass can be left out: its node is removed and each consumer of
- * output N is connected to the input named by bypass.outputs[N].
+ * output N is connected to the input named by bypass.outputs[N]. A guide with
+ * a frame mapping but no fixed position is a spare slot: it is used only when
+ * the studio sends that keyframe's position.
  */
+const validPosition = (value) => typeof value === 'number' && value > 0 && value <= 1;
+
 function validateKeyframeBindings(keyframes, workflow) {
   if (!Array.isArray(keyframes) || keyframes.length < 1 || keyframes.length > 8) throw new RequestError('Keyframe mappings must be a list of 1–8 guide images.');
   return keyframes.map((binding, index) => {
     const label = `keyframe ${index + 2}`;
     const result = widget(binding, workflow, 'string', label);
-    if (typeof binding.position !== 'number' || !(binding.position > 0 && binding.position <= 1)) throw new RequestError(`The ${label} mapping needs a position after 0 and up to 1.`);
-    result.position = binding.position;
     if (binding.frame !== undefined) result.frame = widget(binding.frame, workflow, 'number', `${label} frame`);
+    if (binding.position !== undefined || !result.frame) {
+      if (!validPosition(binding.position)) throw new RequestError(`The ${label} mapping needs a position after 0 and up to 1.`);
+      result.position = binding.position;
+    } else if (binding.bypass === undefined) throw new RequestError(`The ${label} mapping needs a fixed position or a bypass.`);
     if (binding.bypass !== undefined) {
       const { nodeId, outputs } = binding.bypass ?? {};
       const node = typeof nodeId === 'string' && !forbidden.has(nodeId) ? workflow[nodeId] : undefined;
@@ -128,7 +134,8 @@ export function guideWorkflow(workflow, bindings, keyframes, frames) {
   const graph = structuredClone(workflow);
   for (const [index, binding] of (bindings.keyframes ?? []).entries()) {
     if (keyframes[index]) {
-      if (binding.frame && Number.isInteger(frames)) graph[binding.frame.nodeId].inputs[binding.frame.input] = Math.round(binding.position * (frames - 1));
+      const position = keyframes[index].position ?? binding.position;
+      if (binding.frame && Number.isInteger(frames)) graph[binding.frame.nodeId].inputs[binding.frame.input] = Math.round(position * (frames - 1));
       continue;
     }
     const { nodeId, outputs } = binding.bypass;
@@ -198,6 +205,12 @@ export function validateRender(body, saved) {
   const bindings = validateBindings(body.bindings ?? saved?.bindings, workflow);
   const image = decodeImage(body.image);
   if (body.keyframes !== undefined && (!Array.isArray(body.keyframes) || body.keyframes.length > 8)) throw new RequestError('Send up to eight keyframe images.');
+  // Positions place each keyframe in time; without them each guide keeps its mapped position.
+  const positions = body.positions;
+  if (positions !== undefined) {
+    if (!Array.isArray(positions) || positions.length !== (body.keyframes?.length ?? 0) || !positions.every(validPosition)) throw new RequestError('Send one position after 0 and up to 1 for each keyframe.');
+    if (positions.length > (bindings.keyframes?.length ?? 0)) throw new RequestError(`This workflow guides up to ${bindings.keyframes?.length ?? 0} later keyframes.`);
+  }
   // Studios may always send their later keyframes; only mapped guides are used.
   const keyframes = (bindings.keyframes ?? []).map((binding, index) => {
     const source = body.keyframes?.[index] ?? null;
@@ -205,8 +218,11 @@ export function validateRender(body, saved) {
       if (!binding.bypass) throw new RequestError(`This workflow needs an image for keyframe ${index + 2}.`);
       return null;
     }
+    const position = positions?.[index] ?? binding.position;
+    if (position === undefined) throw new RequestError(`Keyframe ${index + 2} needs a position in the shot.`);
+    if (positions && position !== binding.position && !binding.frame) throw new RequestError(`This workflow fixes the time of keyframe ${index + 2}.`);
     const decoded = decodeImage(source);
-    return { ...decoded, filename: decoded.filename.replace('toybox-stage', `toybox-keyframe-${index + 2}`), source };
+    return { ...decoded, filename: decoded.filename.replace('toybox-stage', `toybox-keyframe-${index + 2}`), source, position };
   });
   if (typeof body.prompt !== 'string' || !body.prompt.trim() || body.prompt.length > 20000) {
     throw new RequestError('Write a compiled shot direction between 1 and 20,000 characters.');
@@ -220,7 +236,7 @@ export function validateRender(body, saved) {
   if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 1 || duration > 30) {
     throw new RequestError('Duration must be between 1 and 30 seconds.');
   }
-  return { workflow, bindings, image, keyframes, prompt: body.prompt.trim(), negativePrompt: body.negativePrompt, seed, duration };
+  return { workflow, bindings, image, keyframes, positions, prompt: body.prompt.trim(), negativePrompt: body.negativePrompt, seed, duration };
 }
 
 export function validateMetadata(value) {

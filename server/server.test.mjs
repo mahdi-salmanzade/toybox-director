@@ -183,6 +183,24 @@ test('keyframe mappings need a guide image widget, a valid position, and a bypas
   assert.equal(guided['7'].inputs.frame_idx, 0, 'the saved workflow is never mutated');
 });
 
+test('a spare guide slot has no fixed time: it is used only with a position from the studio', () => {
+  const guided = { ...workflow, '6': { class_type: 'LoadImage', inputs: { image: 'spare.png' } }, '7': { class_type: 'Guide', inputs: { positive: ['2', 0], image: ['6', 0], frame_idx: 0 } } };
+  guided['3'] = { ...guided['3'], inputs: { ...guided['3'].inputs, positive: ['7', 0] } };
+  const spare = { nodeId: '6', input: 'image', frame: { nodeId: '7', input: 'frame_idx' }, bypass: { nodeId: '7', outputs: ['positive'] } };
+  const mapped = validateBindings({ ...bindings, keyframes: [spare] }, guided);
+  assert.equal(mapped.keyframes[0].position, undefined);
+  assert.throws(() => validateBindings({ ...bindings, keyframes: [{ ...spare, bypass: undefined }] }, guided), /fixed position or a bypass/);
+  assert.throws(() => validateBindings({ ...bindings, keyframes: [{ ...spare, frame: undefined }] }, guided), /position/);
+  const request = { ...render, workflow: guided, bindings: mapped };
+  assert.throws(() => validateRender({ ...request, keyframes: [render.image] }), /needs a position/);
+  const placed = validateRender({ ...request, keyframes: [render.image], positions: [.25] });
+  assert.equal(placed.keyframes[0].position, .25);
+  assert.equal(guideWorkflow(guided, mapped, placed.keyframes, 49)['7'].inputs.frame_idx, 12);
+  assert.throws(() => validateRender({ ...request, keyframes: [render.image], positions: [] }), /one position/);
+  assert.throws(() => validateRender({ ...request, keyframes: [render.image], positions: [1.5] }), /one position/);
+  assert.throws(() => validateRender({ ...request, keyframes: [render.image, render.image], positions: [.5, 1] }), /up to 1 later keyframes/);
+});
+
 test('official SDK uploads the image, substitutes widgets, polls, and downloads real response bytes', async (t) => {
   const seen = [];
   let submitted;

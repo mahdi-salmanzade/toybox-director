@@ -146,8 +146,14 @@
       "title": "Guide: keyframe 3"
     }
   },
-  "7": {
-    "class_type": "LTXVConditioning",
+  "19": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-4.png"
+    }
+  },
+  "20": {
+    "class_type": "LTXVAddGuide",
     "inputs": {
       "positive": [
         "17",
@@ -155,6 +161,165 @@
       ],
       "negative": [
         "17",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "17",
+        2
+      ],
+      "image": [
+        "19",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-5.png"
+    }
+  },
+  "22": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "20",
+        0
+      ],
+      "negative": [
+        "20",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "20",
+        2
+      ],
+      "image": [
+        "21",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-6.png"
+    }
+  },
+  "24": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "22",
+        0
+      ],
+      "negative": [
+        "22",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "22",
+        2
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-7.png"
+    }
+  },
+  "26": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "negative": [
+        "24",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "24",
+        2
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "27": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "toybox-keyframe-8.png"
+    }
+  },
+  "28": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "negative": [
+        "26",
+        1
+      ],
+      "vae": [
+        "1",
+        2
+      ],
+      "latent": [
+        "26",
+        2
+      ],
+      "image": [
+        "27",
+        0
+      ],
+      "frame_idx": 72,
+      "strength": 0.8
+    }
+  },
+  "7": {
+    "class_type": "LTXVConditioning",
+    "inputs": {
+      "positive": [
+        "28",
+        0
+      ],
+      "negative": [
+        "28",
         1
       ],
       "frame_rate": 24
@@ -199,7 +364,7 @@
         0
       ],
       "latent_image": [
-        "17",
+        "28",
         2
       ]
     }
